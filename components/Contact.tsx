@@ -246,46 +246,46 @@ export function Contact() {
                     </Field>
                   </div>
 
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <Field label="Phone Number" error={errors.phone}>
-                      <div className="flex gap-2">
-                        <select
-                          value={form.countryIso}
-                          onChange={(e) => update("countryIso")(e.target.value)}
-                          aria-label="Country dial code"
-                          className="input-field w-32 shrink-0 appearance-none bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%230a1628%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22/></svg>')] bg-[length:10px_10px] bg-[position:right_0.65rem_center] bg-no-repeat px-3 pr-7"
-                        >
-                          {COUNTRIES.map((c) => (
-                            <option key={c.iso} value={c.iso}>
-                              {flagEmoji(c.iso)} +{c.dial} {c.name}
-                            </option>
-                          ))}
-                        </select>
-                        <input
-                          type="tel"
-                          autoComplete="tel-national"
-                          value={form.phone}
-                          onChange={(e) => update("phone")(e.target.value)}
-                          placeholder="707 779 8418"
-                          className="input-field flex-1"
-                        />
-                      </div>
-                    </Field>
-                    <Field label="Service Interested In" required error={errors.service}>
+                  <Field label="Phone Number" error={errors.phone}>
+                    <div className="flex flex-col gap-2 sm:flex-row">
                       <select
-                        value={form.service}
-                        onChange={(e) => update("service")(e.target.value)}
-                        className="input-field appearance-none bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%230a1628%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22/></svg>')] bg-[length:12px_12px] bg-[position:right_1rem_center] bg-no-repeat pr-10"
+                        value={form.countryIso}
+                        onChange={(e) => update("countryIso")(e.target.value)}
+                        aria-label="Country dial code"
+                        className="input-field w-full shrink-0 appearance-none bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%230a1628%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22/></svg>')] bg-[length:12px_12px] bg-[position:right_1rem_center] bg-no-repeat pr-10 sm:w-56"
                       >
-                        <option value="">Select a service</option>
-                        {SERVICES.map((s) => (
-                          <option key={s} value={s}>
-                            {s}
+                        {COUNTRIES.map((c) => (
+                          <option key={c.iso} value={c.iso}>
+                            {flagEmoji(c.iso)} +{c.dial} {c.name}
                           </option>
                         ))}
                       </select>
-                    </Field>
-                  </div>
+                      <input
+                        type="tel"
+                        autoComplete="tel-national"
+                        inputMode="tel"
+                        value={form.phone}
+                        onChange={(e) => update("phone")(e.target.value)}
+                        placeholder="707 779 8418"
+                        className="input-field min-w-0 flex-1"
+                      />
+                    </div>
+                  </Field>
+
+                  <Field label="Service Interested In" required error={errors.service}>
+                    <select
+                      value={form.service}
+                      onChange={(e) => update("service")(e.target.value)}
+                      className="input-field appearance-none bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%230a1628%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22/></svg>')] bg-[length:12px_12px] bg-[position:right_1rem_center] bg-no-repeat pr-10"
+                    >
+                      <option value="">Select a service</option>
+                      {SERVICES.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
 
                   <Field label="Project Description" required error={errors.description}>
                     <textarea
