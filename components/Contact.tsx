@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Reveal } from "./ui/Reveal";
 import { SectionTag } from "./ui/SectionTag";
+import { COUNTRIES, flagEmoji, findCountry } from "@/lib/countries";
 
 const SERVICES = [
   "Branding - Starter Package",
@@ -29,6 +30,7 @@ const SERVICES = [
 type FormState = {
   name: string;
   email: string;
+  countryIso: string;
   phone: string;
   service: string;
   description: string;
@@ -37,6 +39,7 @@ type FormState = {
 const EMPTY: FormState = {
   name: "",
   email: "",
+  countryIso: "NG",
   phone: "",
   service: "",
   description: "",
@@ -45,13 +48,13 @@ const EMPTY: FormState = {
 const GOOGLE_FORM_ACTION =
   "https://docs.google.com/forms/d/e/1FAIpQLScPiZduQtrerFxLYNNpRMH0t_APcn1am5vT1d0Z81m5tQtWRw/formResponse";
 
-const GOOGLE_FORM_FIELD_IDS: Record<keyof FormState, string> = {
+const GOOGLE_FORM_FIELD_IDS = {
   name: "entry.392051163",
   email: "entry.1428123184",
   phone: "entry.1584093821",
   service: "entry.1626562734",
   description: "entry.1360398789",
-};
+} as const;
 
 const GOOGLE_FORM_HIDDEN: Record<string, string> = {
   fvv: "1",
@@ -85,10 +88,25 @@ export function Contact() {
     setSubmitting(true);
 
     // Build the Google Forms payload using the entry.* IDs from the form's HTML.
+    // Phone gets normalized to "CCNUMBER" (digits only, no '+', no spaces) — the
+    // exact format wa.me expects (e.g. "2347077798418" → wa.me/2347077798418).
+    // Leading 0 is stripped because most countries drop the trunk prefix when going
+    // international.
+    const phoneEntry = (() => {
+      const raw = form.phone.trim();
+      if (!raw) return "";
+      const country = findCountry(form.countryIso);
+      const digits = raw.replace(/\D/g, "").replace(/^0+/, "");
+      if (!digits) return "";
+      return `${country.dial}${digits}`;
+    })();
+
     const body = new URLSearchParams();
-    (Object.keys(GOOGLE_FORM_FIELD_IDS) as Array<keyof FormState>).forEach((key) => {
-      body.append(GOOGLE_FORM_FIELD_IDS[key], form[key]);
-    });
+    body.append(GOOGLE_FORM_FIELD_IDS.name, form.name);
+    body.append(GOOGLE_FORM_FIELD_IDS.email, form.email);
+    body.append(GOOGLE_FORM_FIELD_IDS.phone, phoneEntry);
+    body.append(GOOGLE_FORM_FIELD_IDS.service, form.service);
+    body.append(GOOGLE_FORM_FIELD_IDS.description, form.description);
     Object.entries(GOOGLE_FORM_HIDDEN).forEach(([k, v]) => body.append(k, v));
 
     try {
@@ -230,14 +248,28 @@ export function Contact() {
 
                   <div className="grid gap-5 sm:grid-cols-2">
                     <Field label="Phone Number" error={errors.phone}>
-                      <input
-                        type="tel"
-                        autoComplete="tel"
-                        value={form.phone}
-                        onChange={(e) => update("phone")(e.target.value)}
-                        placeholder="+234 ..."
-                        className="input-field"
-                      />
+                      <div className="flex gap-2">
+                        <select
+                          value={form.countryIso}
+                          onChange={(e) => update("countryIso")(e.target.value)}
+                          aria-label="Country dial code"
+                          className="input-field w-32 shrink-0 appearance-none bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%230a1628%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22/></svg>')] bg-[length:10px_10px] bg-[position:right_0.65rem_center] bg-no-repeat px-3 pr-7"
+                        >
+                          {COUNTRIES.map((c) => (
+                            <option key={c.iso} value={c.iso}>
+                              {flagEmoji(c.iso)} +{c.dial} {c.name}
+                            </option>
+                          ))}
+                        </select>
+                        <input
+                          type="tel"
+                          autoComplete="tel-national"
+                          value={form.phone}
+                          onChange={(e) => update("phone")(e.target.value)}
+                          placeholder="707 779 8418"
+                          className="input-field flex-1"
+                        />
+                      </div>
                     </Field>
                     <Field label="Service Interested In" required error={errors.service}>
                       <select
