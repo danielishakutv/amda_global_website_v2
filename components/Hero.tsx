@@ -1,7 +1,6 @@
 ﻿"use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { AnimatedCounter } from "./ui/AnimatedCounter";
 import { useSiteContent } from "@/lib/content-store";
@@ -30,9 +29,9 @@ export function Hero() {
       aria-label="Hero"
       className="relative overflow-hidden bg-navy-deep text-white"
     >
-      {/* Supplied background image, held back under layered navy overlays so
-          type stays readable — darker at the top for the transparent navbar,
-          softer in the middle, grounding at the bottom. */}
+      {/* Supplied background image under one flat navy overlay.
+          Text paints instantly (no entrance animation) so copy and image
+          arrive together — no lag, no busy gradient stacks. */}
       {hero.backgroundImage ? (
         <>
           <Image
@@ -44,33 +43,12 @@ export function Hero() {
             sizes="100vw"
             className="absolute inset-0 h-full w-full object-cover"
           />
-          {/* Base dim so image never looks raw */}
-          <div aria-hidden className="absolute inset-0 bg-navy-deep/70" />
-          {/* Top-down blend: heavy at the top for nav plus headline, lifts in middle, settles darker at bottom */}
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-gradient-to-b from-navy-deep/90 via-navy-deep/30 to-navy-deep/80"
-          />
-          {/* Extra top scrim just behind navbar so upper area never looks like no overlay */}
-          <div
-            aria-hidden
-            className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-navy-deep via-navy-deep/60 to-transparent"
-          />
-          {/* Soft left shade so headline always sits on dark */}
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-gradient-to-r from-navy-deep/50 via-transparent to-transparent"
-          />
+          <div aria-hidden className="absolute inset-0 bg-navy-deep/65" />
         </>
       ) : null}
 
       <div className="container relative pb-20 pt-32 sm:pb-24 sm:pt-40">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="max-w-3xl"
-        >
+        <div className="hero-copy max-w-3xl">
           <p className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-gold">
             <span aria-hidden className="h-px w-8 bg-gold" />
             {hero.tag}
@@ -97,7 +75,7 @@ export function Hero() {
               {hero.secondaryCta}
             </a>
           </div>
-        </motion.div>
+        </div>
 
         {/* Focus areas — guide §1: what AMDA stands for, plain list */}
         <div className="mt-14 border-t border-white/15 pt-7">

@@ -84,8 +84,8 @@ export function LoginForm() {
                   <label htmlFor="admin-username" className="mb-1.5 block text-sm font-medium text-navy">
                     Username
                   </label>
-                  <div className="relative">
-                    <User size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
+                  <div className="flex items-center gap-3 rounded-2xl border border-navy/15 bg-white px-4 transition-all focus-within:border-gold focus-within:ring-4 focus-within:ring-gold/15">
+                    <User size={16} className="shrink-0 text-muted" />
                     <input
                       id="admin-username"
                       type="text"
@@ -94,7 +94,7 @@ export function LoginForm() {
                       onChange={(e) => setUsername(e.target.value)}
                       placeholder="Your username"
                       disabled={lockSecs > 0}
-                      className="input-field pl-12"
+                      className="w-full bg-transparent py-4 text-sm text-navy outline-none placeholder:text-muted/70 disabled:opacity-60"
                     />
                   </div>
                 </div>
@@ -103,8 +103,8 @@ export function LoginForm() {
                   <label htmlFor="admin-password" className="mb-1.5 block text-sm font-medium text-navy">
                     Password
                   </label>
-                  <div className="relative">
-                    <Lock size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
+                  <div className="flex items-center gap-3 rounded-2xl border border-navy/15 bg-white px-4 transition-all focus-within:border-gold focus-within:ring-4 focus-within:ring-gold/15">
+                    <Lock size={16} className="shrink-0 text-muted" />
                     <input
                       id="admin-password"
                       type={showPw ? "text" : "password"}
@@ -113,13 +113,13 @@ export function LoginForm() {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Your password"
                       disabled={lockSecs > 0}
-                      className="input-field pl-12 pr-12"
+                      className="w-full min-w-0 flex-1 bg-transparent py-4 text-sm text-navy outline-none placeholder:text-muted/70 disabled:opacity-60"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPw((v) => !v)}
                       aria-label={showPw ? "Hide password" : "Show password"}
-                      className="absolute right-3 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full text-muted transition-colors hover:bg-cream hover:text-navy"
+                      className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted transition-colors hover:bg-cream hover:text-navy"
                     >
                       {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>

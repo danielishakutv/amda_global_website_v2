@@ -26,6 +26,13 @@ export const metadata: Metadata = {
   title: "About Us — A Brand Strategy & Compliance Advisory Firm",
   description:
     "Learn how AMDA Global Solution helps businesses across Nigeria and Africa build brands that are clear, credible, scalable, and legally protected. Our story, vision, mission, and core values.",
+  alternates: { canonical: "/about" },
+  openGraph: {
+    title: "About AMDA Global Solution",
+    description:
+      "Our story, vision, mission and values — a brand strategy and compliance advisory firm for Nigeria and Africa.",
+    url: "https://amdaglobal.com/about",
+  },
 };
 
 const EXPERTISE_AREAS = [

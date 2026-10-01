@@ -141,6 +141,54 @@ body {
   }
 }
 
+/* Hero legibility: flat text-shadow so white copy reads over bright
+   photo areas. No overlay divs, no gradients — invisible by design. */
+.hero-copy {
+  text-shadow:
+    0 1px 2px rgba(4, 22, 42, 0.6),
+    0 2px 18px rgba(4, 22, 42, 0.45);
+}
+
+/* Admin sidebar scroll: thin, quiet, on-theme — no chunky native bar */
+.admin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+}
+.admin-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+.admin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
+}
+.admin-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+@media (max-width: 639px) {
+  body[data-consent-open="true"] .whatsapp-widget {
+    display: none;
+  }
+}
+
+/* Admin toast entrance */
+@keyframes toast-pop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+.toast-pop {
+  animation: toast-pop 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 /* Reduce motion preference */
 @media (prefers-reduced-motion: reduce) {
   html {

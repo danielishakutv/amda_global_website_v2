@@ -41,6 +41,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://amdaglobal.com"),
+  alternates: { canonical: "/" },
   title: {
     default: "AMDA Global Solution — Building Scalable and Protected Brands",
     template: "%s | AMDA Global Solution",
@@ -65,12 +66,14 @@ export const metadata: Metadata = {
     description:
       "Brand strategy, experience, and compliance advisory for businesses across Nigeria and Africa.",
     siteName: "AMDA Global Solution",
+    images: [{ url: "/hero-bg.webp", alt: "AMDA Global Solution" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "AMDA Global Solution",
     description:
       "Brand strategy, experience, and compliance advisory for businesses across Nigeria and Africa.",
+    images: ["/hero-bg.webp"],
   },
   icons: {
     // Perf: 10KB WebP logo instead of the 548KB SVG wrapper (same visuals).
@@ -85,14 +88,38 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
       <head>
-        {/* Perf-only resource hints — no visual change */}
+        {/* Perf-only resource hints — no visual change.
+            next/image (priority) already preloads the hero file itself. */}
         <link rel="preload" as="image" href="/amda-logo.webp" type="image/webp" />
-        <link rel="preload" as="image" href="/hero-bg.webp" type="image/webp" />
         <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://docs.google.com" />
       </head>
       <body className="font-sans antialiased">
+        {/* Structured data: Organization + address/phone for local SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "ProfessionalService",
+              name: "AMDA Global Solutions Ltd",
+              url: "https://amdaglobal.com",
+              description:
+                "Brand strategy, visual identity, brand protection, business compliance, printing and publishing across Nigeria and Africa.",
+              telephone: "+2347077798418",
+              email: "info@amdaglobal.com",
+              address: {
+                "@type": "PostalAddress",
+                streetAddress: "No. 5 H Plaza, Beside NNPC Filling Station, New Nyanya, Karu",
+                addressRegion: "Nasarawa State",
+                addressCountry: "NG",
+              },
+              sameAs: ["https://www.linkedin.com/in/jessehosea/"],
+              areaServed: ["Nigeria", "Africa"],
+            }),
+          }}
+        />
         <ContentProvider>{children}</ContentProvider>
         <ConsentBanner />
 

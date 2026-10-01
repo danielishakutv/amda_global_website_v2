@@ -22,6 +22,9 @@ import {
   MailOpen,
   Trash2,
   CheckCircle2,
+  Loader2,
+  Menu,
+  X,
 } from "lucide-react";
 import { DEFAULT_CONTENT, type SiteContent, type TestimonialItem } from "@/lib/site-content";
 import {
@@ -90,12 +93,13 @@ export function AdminApp() {
   const [mobileNav, setMobileNav] = useState(false);
   const [messages, setMessages] = useState<InboxMessage[]>([]);
   const [toast, setToast] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const showToast = (msg: string) => {
+  const showToast = (msg: string, ms = 2600) => {
     setToast(msg);
     if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 2600);
+    toastTimer.current = setTimeout(() => setToast(null), ms);
   };
 
   const fetchInbox = async () => {
@@ -137,11 +141,16 @@ export function AdminApp() {
     setDirty(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (saving) return;
+    setSaving(true);
+    // Brief beat so the spinner reads as real work, not a flicker.
+    await new Promise((r) => setTimeout(r, 450));
     saveSiteContent(draft);
     audit("content-save", `section=${section}`);
     setSavedAt(new Date().toISOString());
     setDirty(false);
+    setSaving(false);
     showToast("Saved — the site on this device is updated.");
   };
 
@@ -191,15 +200,15 @@ export function AdminApp() {
   return (
     <div className="min-h-screen bg-cream font-sans text-navy">
       <div className="flex min-h-screen">
-        {/* Sidebar */}
-        <aside className="hidden w-72 shrink-0 flex-col bg-navy-deep text-cream lg:flex">
+        {/* Sidebar — fixed: stays put while content scrolls */}
+        <aside className="hidden w-72 shrink-0 flex-col self-start bg-navy-deep text-cream lg:sticky lg:top-0 lg:flex lg:h-screen">
           <div className="border-b border-white/10 p-6">
             <Logo variant="onDark" height={40} />
             <p className="mt-3 text-[0.65rem] font-medium uppercase tracking-[0.22em] text-gold">
               Admin Dashboard
             </p>
           </div>
-          <nav className="flex-1 space-y-1 overflow-y-auto p-4" aria-label="Admin sections">
+          <nav className="admin-scroll flex-1 space-y-1 overflow-y-auto p-4" aria-label="Admin sections">
             {NAV.map((n) => (
               <button
                 key={n.id}
@@ -248,11 +257,11 @@ export function AdminApp() {
             <div className="flex items-center gap-3 px-4 py-4 sm:px-8">
               <button
                 type="button"
-                className="grid h-10 w-10 place-items-center rounded-full border border-navy/15 lg:hidden"
+                className="grid h-10 w-10 place-items-center rounded-full border border-navy/15 text-navy lg:hidden"
                 aria-label="Open admin menu"
                 onClick={() => setMobileNav(true)}
               >
-                ☰
+                <Menu size={18} />
               </button>
               <div className="min-w-0 flex-1">
                 <h1 className="truncate font-display text-xl font-semibold sm:text-2xl">
@@ -265,11 +274,12 @@ export function AdminApp() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={handleSave}
-                  className="inline-flex items-center gap-2 rounded-full bg-navy px-5 py-2.5 text-sm font-semibold text-cream transition-colors hover:bg-navy-soft"
+                  onClick={() => void handleSave()}
+                  disabled={saving}
+                  className="inline-flex items-center gap-2 rounded-full bg-navy px-5 py-2.5 text-sm font-semibold text-cream transition-colors hover:bg-navy-soft disabled:opacity-70"
                 >
-                  <Save size={15} />
-                  Save
+                  {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+                  {saving ? "Saving…" : "Save"}
                 </button>
               </div>
             </div>
@@ -344,11 +354,12 @@ export function AdminApp() {
             <div className="flex flex-wrap gap-2 pb-10">
               <button
                 type="button"
-                onClick={handleSave}
-                className="inline-flex items-center gap-2 rounded-full bg-gold px-6 py-3 text-sm font-semibold text-white hover:bg-gold-soft"
+                onClick={() => void handleSave()}
+                disabled={saving}
+                className="inline-flex items-center gap-2 rounded-full bg-gold px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gold-soft disabled:opacity-70"
               >
-                <Save size={15} />
-                Save changes
+                {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+                {saving ? "Saving…" : "Save changes"}
               </button>
               <button
                 type="button"
@@ -395,10 +406,20 @@ export function AdminApp() {
       {toast && (
         <div
           role="status"
-          className="fixed bottom-6 left-1/2 z-[80] flex -translate-x-1/2 items-center gap-2.5 rounded-full bg-navy px-5 py-3 text-sm font-medium text-cream shadow-card"
+          className="toast-pop fixed bottom-6 left-1/2 z-[80] flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-center gap-3 rounded-2xl border border-white/10 bg-navy-deep p-4 text-cream shadow-card"
         >
-          <CheckCircle2 size={16} className="shrink-0 text-gold" />
-          {toast}
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gold text-white">
+            <CheckCircle2 size={17} />
+          </span>
+          <p className="min-w-0 flex-1 text-sm font-medium leading-snug">{toast}</p>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            aria-label="Dismiss"
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+          >
+            <X size={15} />
+          </button>
         </div>
       )}
     </div>
