@@ -14,7 +14,8 @@ import {
 } from "lucide-react";
 import { Reveal } from "./ui/Reveal";
 import { SectionTag } from "./ui/SectionTag";
-import { COUNTRIES, flagEmoji, findCountry } from "@/lib/countries";
+import { COUNTRIES, flagEmoji } from "@/lib/countries";
+import { useSiteContent } from "@/lib/content-store";
 
 const SERVICES = [
   "Branding - Starter Package",
@@ -45,24 +46,8 @@ const EMPTY: FormState = {
   description: "",
 };
 
-const GOOGLE_FORM_ACTION =
-  "https://docs.google.com/forms/d/e/1FAIpQLScPiZduQtrerFxLYNNpRMH0t_APcn1am5vT1d0Z81m5tQtWRw/formResponse";
-
-const GOOGLE_FORM_FIELD_IDS = {
-  name: "entry.392051163",
-  email: "entry.1428123184",
-  phone: "entry.1584093821",
-  service: "entry.1626562734",
-  description: "entry.1360398789",
-} as const;
-
-const GOOGLE_FORM_HIDDEN: Record<string, string> = {
-  fvv: "1",
-  fbzx: "-4384942993879802654",
-  pageHistory: "0",
-};
-
 export function Contact() {
+  const site = useSiteContent();
   const [form, setForm] = useState<FormState>(EMPTY);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -87,42 +72,34 @@ export function Contact() {
 
     setSubmitting(true);
 
-    // Build the Google Forms payload using the entry.* IDs from the form's HTML.
-    // Phone gets normalized to "CCNUMBER" (digits only, no '+', no spaces) — the
-    // exact format wa.me expects (e.g. "2347077798418" → wa.me/2347077798418).
-    // Leading 0 is stripped because most countries drop the trunk prefix when going
-    // international.
-    const phoneEntry = (() => {
-      const raw = form.phone.trim();
-      if (!raw) return "";
-      const country = findCountry(form.countryIso);
-      const digits = raw.replace(/\D/g, "").replace(/^0+/, "");
-      if (!digits) return "";
-      return `${country.dial}${digits}`;
-    })();
-
-    const body = new URLSearchParams();
-    body.append(GOOGLE_FORM_FIELD_IDS.name, form.name);
-    body.append(GOOGLE_FORM_FIELD_IDS.email, form.email);
-    body.append(GOOGLE_FORM_FIELD_IDS.phone, phoneEntry);
-    body.append(GOOGLE_FORM_FIELD_IDS.service, form.service);
-    body.append(GOOGLE_FORM_FIELD_IDS.description, form.description);
-    Object.entries(GOOGLE_FORM_HIDDEN).forEach(([k, v]) => body.append(k, v));
-
     try {
-      // Google Forms doesn't return CORS headers, so we can't read the response.
-      // mode: "no-cors" lets the POST succeed silently; the form data still reaches Google.
-      await fetch(GOOGLE_FORM_ACTION, {
+      // Saved to the dashboard inbox AND forwarded to Google Forms by the server.
+      const res = await fetch("/api/contact/", {
         method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: body.toString(),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          countryIso: form.countryIso,
+          phone: form.phone,
+          service: form.service,
+          description: form.description,
+        }),
       });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => null)) as { reason?: string } | null;
+        if (data?.reason === "too-many") {
+          throw new Error("too-many");
+        }
+        throw new Error("send-failed");
+      }
       setSubmitted(true);
       setForm(EMPTY);
-    } catch {
+    } catch (err) {
       setSubmitError(
-        "We couldn't send your message just now. Please try again, or email info@amdaglobal.com directly."
+        err instanceof Error && err.message === "too-many"
+          ? "You've sent several messages already — please wait a little while and try again."
+          : "We couldn't send your message just now. Please try again, or email info@amdaglobal.com directly."
       );
     } finally {
       setSubmitting(false);
@@ -133,13 +110,8 @@ export function Contact() {
     <section
       id="contact"
       aria-labelledby="contact-heading"
-      className="section relative overflow-hidden bg-cream"
+      className="section bg-cream"
     >
-      <div
-        aria-hidden
-        className="dot-pattern-dark absolute inset-0 opacity-50 [mask-image:radial-gradient(ellipse_at_top,black_20%,transparent_70%)]"
-      />
-
       <div className="container relative">
         <div className="mx-auto max-w-3xl text-center">
           <Reveal>
@@ -174,24 +146,24 @@ export function Contact() {
                 <ContactItem
                   icon={<Phone size={18} />}
                   label="Phone"
-                  value="+234 707 779 8418"
-                  href="tel:+2347077798418"
+                  value={site.phone}
+                  href={site.phoneHref}
                 />
                 <ContactItem
                   icon={<Mail size={18} />}
                   label="Email"
-                  value="info@amdaglobal.com"
-                  href="mailto:info@amdaglobal.com"
+                  value={site.email}
+                  href={`mailto:${site.email}`}
                 />
                 <ContactItem
                   icon={<MapPin size={18} />}
                   label="Address"
-                  value="No. 19, Famous Street, Ushafa, Abuja, Nigeria"
+                  value={site.address}
                 />
                 <ContactItem
                   icon={<Globe2 size={18} />}
                   label="Service Coverage"
-                  value="Nigeria & International (Africa)"
+                  value={site.coverage}
                 />
               </ul>
 
@@ -203,7 +175,7 @@ export function Contact() {
                   <div>
                     <p className="font-display text-sm font-semibold text-gold">Quick Response</p>
                     <p className="mt-1 text-sm text-white/80">
-                      We typically respond within 24-48 hours. Urgent? Call us directly.
+                      We typically respond within {site.responseTime}. Urgent? Call us directly.
                     </p>
                   </div>
                 </div>

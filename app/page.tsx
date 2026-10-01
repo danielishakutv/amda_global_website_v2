@@ -1,12 +1,32 @@
+import dynamic from "next/dynamic";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
-import { About } from "@/components/About";
-import { WhyChoose } from "@/components/WhyChoose";
-import { Services } from "@/components/Services";
-import { HowWeWork } from "@/components/HowWeWork";
-import { Contact } from "@/components/Contact";
-import { Footer } from "@/components/Footer";
-import { WhatsAppWidget } from "@/components/WhatsAppWidget";
+
+// Perf-only code-splitting: same content, same SSR HTML, but below-fold
+// sections ship as separate JS chunks so the hero paints with less JS.
+// Only Navbar + Hero stay in the critical bundle.
+const About = dynamic(() => import("@/components/About").then((m) => m.About));
+const WhyChoose = dynamic(
+  () => import("@/components/WhyChoose").then((m) => m.WhyChoose)
+);
+const Services = dynamic(
+  () => import("@/components/Services").then((m) => m.Services)
+);
+const HowWeWork = dynamic(
+  () => import("@/components/HowWeWork").then((m) => m.HowWeWork)
+);
+const Testimonials = dynamic(
+  () => import("@/components/Testimonials").then((m) => m.Testimonials)
+);
+const Founder = dynamic(() => import("@/components/Founder").then((m) => m.Founder));
+const Contact = dynamic(
+  () => import("@/components/Contact").then((m) => m.Contact)
+);
+const Footer = dynamic(() => import("@/components/Footer").then((m) => m.Footer));
+const WhatsAppWidget = dynamic(
+  () => import("@/components/WhatsAppWidget").then((m) => m.WhatsAppWidget),
+  { ssr: false }
+);
 
 export default function Home() {
   return (
@@ -18,6 +38,8 @@ export default function Home() {
         <WhyChoose />
         <Services />
         <HowWeWork />
+        <Testimonials />
+        <Founder />
         <Contact />
       </main>
       <Footer />

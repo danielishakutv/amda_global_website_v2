@@ -1,21 +1,27 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Source_Serif_4, Inter, JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
-import { ConsentBanner } from "@/components/ConsentBanner";
+import dynamic from "next/dynamic";
+import { ContentProvider } from "@/lib/content-store";
 import "./globals.css";
+
+const ConsentBanner = dynamic(
+  () => import("@/components/ConsentBanner").then((m) => m.ConsentBanner),
+  { ssr: false }
+);
 
 const GA_MEASUREMENT_ID = "G-X9392YXEZK";
 
-const display = Fraunces({
+const display = Source_Serif_4({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-display",
   display: "swap",
 });
 
-const sans = Plus_Jakarta_Sans({
+const sans = Inter({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-sans",
   display: "swap",
 });
@@ -67,19 +73,27 @@ export const metadata: Metadata = {
       "Brand strategy, experience, and compliance advisory for businesses across Nigeria and Africa.",
   },
   icons: {
-    icon: [
-      { url: "/amda_logo.svg", type: "image/svg+xml" },
-      { url: "/amda_global_logo.png", type: "image/png" },
-    ],
-    apple: "/amda_global_logo.png",
+    // Perf: 10KB WebP logo instead of the 548KB SVG wrapper (same visuals).
+    // Saves ~540KB on every first visit. Replace with an optimized
+    // 180x180 PNG (<30KB) when you have one.
+    icon: [{ url: "/amda-logo.webp", type: "image/webp" }],
+    apple: "/amda-logo.webp",
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
+      <head>
+        {/* Perf-only resource hints — no visual change */}
+        <link rel="preload" as="image" href="/amda-logo.webp" type="image/webp" />
+        <link rel="preload" as="image" href="/hero-bg.webp" type="image/webp" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://docs.google.com" />
+      </head>
       <body className="font-sans antialiased">
-        {children}
+        <ContentProvider>{children}</ContentProvider>
         <ConsentBanner />
 
         {/* Consent Mode v2 — defaults must run BEFORE gtag.js loads.
@@ -101,11 +115,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             });
           `}
         </Script>
+        {/* Perf: lazyOnload (idle) instead of afterInteractive — GA (~100KB) no longer
+            competes with LCP/hero on first paint. Same tracking, later load. */}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="ga-init" strategy="afterInteractive">
+        <Script id="ga-init" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}

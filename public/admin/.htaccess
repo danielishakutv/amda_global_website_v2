@@ -1,0 +1,18 @@
+# AMDA /admin — server-side password gate (layer 2 of admin security).
+# Layer 1 (build credentials via `npm run admin:hash`) is already in the code.
+# This file enforces a REAL server login before the admin page even loads.
+#
+# ACTIVATE (pick one):
+#   A) Easiest — cPanel "Directory Privacy": select the `admin` folder, enable
+#      protection, create a user. cPanel writes its own block here; keep this file.
+#   B) Manual — create the password file OUTSIDE the web root, e.g.:
+#        htpasswd -c /home/YOURUSER/.htpasswds/amda-admin editor-name
+#      then uncomment the 4 lines below and fix the AuthUserFile path:
+#
+# AuthType Basic
+# AuthName "AMDA Admin — authorized editors only"
+# AuthUserFile /home/YOURUSER/.htpasswds/amda-admin
+# Require valid-user
+#
+# NEVER put the .htpasswd file inside the site folder — it would be downloadable.
+# Until activated, this file does nothing (block above stays commented).

@@ -42,7 +42,7 @@ export function Navbar() {
       >
         <nav className="container flex items-center justify-between">
           <a href="/" className="group flex items-center" aria-label="AMDA Global Solution home">
-            <Logo variant="onDark" height={48} className="transition-transform duration-300 group-hover:scale-[1.03]" />
+            <Logo variant="onDark" height={48} priority className="transition-transform duration-300 group-hover:scale-[1.03]" />
           </a>
 
           <ul className="hidden items-center gap-1 md:flex">

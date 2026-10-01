@@ -14,7 +14,20 @@ export function WhatsAppWidget() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 800);
+    // Perf: defer floating widget until browser is idle + 2.5s so it never
+    // competes with hero/LCP. Same UI, just appears slightly later.
+    let t: ReturnType<typeof setTimeout>;
+    const mount = () => {
+      t = setTimeout(() => setMounted(true), 2500);
+    };
+    if ("requestIdleCallback" in window) {
+      const idle = (window as Window & { requestIdleCallback: (cb: () => void) => number }).requestIdleCallback(mount);
+      return () => {
+        (window as Window & { cancelIdleCallback?: (id: number) => void }).cancelIdleCallback?.(idle);
+        clearTimeout(t);
+      };
+    }
+    mount();
     return () => clearTimeout(t);
   }, []);
 
@@ -48,7 +61,7 @@ export function WhatsAppWidget() {
               <div className="flex-1">
                 <p className="flex items-center gap-1.5 text-xs text-white/70">
                   <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                    <span className="absolute inline-flex h-full w-full motion-safe:animate-ping rounded-full bg-emerald-400 opacity-60" />
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
                   </span>
                   Typically replies instantly
@@ -112,7 +125,7 @@ export function WhatsAppWidget() {
         aria-expanded={open}
         className="group relative grid h-14 w-14 place-items-center rounded-full bg-emerald-500 text-white shadow-card transition-colors hover:bg-emerald-600"
       >
-        <span className="absolute inset-0 -z-10 animate-ping rounded-full bg-emerald-400/40" />
+        <span aria-hidden className="absolute inset-0 -z-10 motion-safe:animate-ping rounded-full bg-emerald-400/40" />
         <AnimatePresence mode="wait" initial={false}>
           {open ? (
             <motion.span

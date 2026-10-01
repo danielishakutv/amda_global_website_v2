@@ -1,0 +1,301 @@
+/* AMDA site content — single source of truth, mirrors guide.md.
+   Homepage + About + Admin all read from here.
+   Admin overrides are stored in localStorage (key below) and merged over these defaults,
+   so a rebuild without the override always falls back to this file. */
+
+export const CONTENT_VERSION = 2;
+export const CONTENT_STORAGE_KEY = "amda-content-v1";
+
+export type VisualPackage = {
+  id: string;
+  name: string;
+  price: string;
+  description: string;
+  features: string[];
+  cta: string;
+};
+
+export type ComplianceRow = { label: string; value: string };
+
+export type TestimonialItem = {
+  id: string;
+  client: string;
+  project: string;
+  kind: "written" | "screenshot" | "photo" | "video" | "audio" | "delivery";
+  quote?: string;
+  media?: string; // /public path or remote URL; empty = placeholder
+  date?: string;
+};
+
+export type TeamMember = {
+  id: string;
+  name: string;
+  role: string;
+  bio?: string;
+  photo: string; // /public path; empty = initials monogram
+  linkedin?: string;
+};
+
+export type SiteContent = {
+  hero: {
+    tag: string;
+    titleA: string;
+    titleAccent1: string;
+    titleB: string;
+    titleAccent2: string;
+    titleC: string;
+    sub: string;
+    primaryCta: string;
+    secondaryCta: string;
+    backgroundImage: string; // e.g. "/AMDA TEAM.png" — empty = gradient only
+  };
+  whoWeAre: {
+    heading: string;
+    sub: string;
+    body: string[];
+  };
+  story: {
+    heading: string;
+    headline: string;
+    body: string[];
+  };
+  vision: string;
+  mission: string;
+  coreValues: string[];
+  packages: VisualPackage[];
+  cac: {
+    title: string;
+    summary: string;
+    rows: ComplianceRow[];
+  };
+  trademark: {
+    title: string;
+    summary: string;
+    rows: ComplianceRow[];
+    priceLabel: string;
+  };
+  complianceAudit: {
+    title: string;
+    summary: string;
+    price: string;
+    formUrl: string; // Google Form link — empty = placeholder button
+  };
+  printPublish: {
+    title: string;
+    summary: string;
+    items: string[];
+  };
+  whyChoose: { title: string; body: string }[];
+  operatingModel: { title: string; body: string }[];
+  responseTime: string;
+  address: string;
+  phone: string;
+  phoneHref: string;
+  email: string;
+  coverage: string;
+  founder: {
+    name: string;
+    title: string;
+    bio: string;
+    photo: string; // "/founderimage.png"
+    linkedin: string;
+  };
+  team: TeamMember[];
+  testimonials: TestimonialItem[];
+  clientCount: string; // empty = "to be announced" placeholder (guide: do not invent)
+};
+
+export const DEFAULT_CONTENT: SiteContent = {
+  hero: {
+    tag: "Brand Strategy & Compliance Advisory",
+    titleA: "Building",
+    titleAccent1: "Scalable",
+    titleB: "and",
+    titleAccent2: "Protected",
+    titleC: "Brands",
+    sub: "A brand strategy, experience, and compliance advisory firm helping businesses build brands that are clear, credible, scalable, and legally protected.",
+    primaryCta: "Start Your Project",
+    secondaryCta: "Explore Services",
+    backgroundImage: "/hero-bg.webp",
+  },
+  whoWeAre: {
+    heading: "A Brand Building, Protection & Business Solutions Company",
+    sub: "AMDA Global Solutions helps businesses, professionals, organizations, and creators build brands that are clear, credible, scalable, and protected.",
+    body: [
+      "We bring together brand strategy and visual identity, brand protection and compliance support, printing, and publishing to help our clients establish their identity, formalize and protect what they build, and present their work professionally.",
+      "Our work serves startups and SMEs, established businesses, personal brands and professionals, organizations and NGOs, authors and aspiring authors, publishers, and other creators who need dependable support in building and presenting their brands or publications.",
+      "From brand development and consultancy to business registration and compliance support, trademark and brand protection, commercial printing, book printing and publishing, AMDA provides practical solutions that help clients move from an idea or identity to a properly established and professionally presented brand or publication.",
+    ],
+  },
+  story: {
+    heading: "Our Story",
+    headline: "We learned it the hard way, so other businesses don't have to.",
+    body: [
+      "AMDA Global Solutions was born from our experience of discovering the gap between branding, compliance, brand protection, and printing — services that are often treated separately, even though they are closely connected in the life of a business.",
+      "Our journey began in the printing industry, where our founder worked as a graphics designer while learning the business of printing. As we worked with more businesses on logos and visual identities, we began to understand that building a brand goes far beyond creating something that looks good.",
+      "We saw businesses invest in branding without first considering whether their names could be properly registered or protected. Some assumed that registering with the Corporate Affairs Commission was enough, only to discover later that there were other important steps involved in properly building and protecting their brands.",
+      "Then, we experienced the problem ourselves. After establishing a design agency, our registered business name was revoked by the Corporate Affairs Commission shortly after we had invested in branding and launched the business. That experience pushed us to learn more about the relationship between branding, compliance, and brand protection — and showed us how costly avoidable mistakes can be.",
+      "That experience became the foundation of AMDA. Today, we bring branding, printing and publishing, compliance support, and brand protection together, giving businesses access to connected solutions under one roof.",
+      "Our goal is simple: to help businesses build intentionally, avoid preventable mistakes, protect what they build, and present themselves professionally as they grow.",
+    ],
+  },
+  vision: "To become the number one trusted African brand partner.",
+  mission: "To help businesses build intentional, sustainable, and protected brands.",
+  coreValues: ["Integrity", "Excellence", "Impact"],
+  packages: [
+    {
+      id: "starter",
+      name: "Starter Package",
+      price: "₦20,000",
+      description: "Perfect for businesses starting their brand journey.",
+      features: ["Brand Audit", "Consultation", "Recommendations"],
+      cta: "Get Started",
+    },
+    {
+      id: "growth",
+      name: "Growth Package",
+      price: "₦70,000",
+      description: "Ideal for businesses ready to level up their brand.",
+      features: [
+        "Brand & Visual Identity",
+        "2 Social Media Designs with Captions",
+        "30-Day Content Plan",
+      ],
+      cta: "Get Started",
+    },
+    {
+      id: "authority",
+      name: "Authority Package",
+      price: "₦150,000",
+      description: "A complete brand system for established companies and businesses.",
+      features: [
+        "Full Brand System",
+        "Brand Positioning Strategy",
+        "6 Weeks of Content Support",
+      ],
+      cta: "Get Started",
+    },
+  ],
+  cac: {
+    title: "Business Name Registration — CAC",
+    summary:
+      "Register your business correctly with the Corporate Affairs Commission and start operating with confidence.",
+    rows: [
+      { label: "Business Name Registration", value: "₦35,000 – ₦45,000" },
+      { label: "Incorporated Trustee (NGO, Church, Mosque etc.)", value: "₦130,000 – ₦150,000" },
+      { label: "Limited Liability Company", value: "₦75,000 – ₦100,000" },
+      { label: "Other Registration Types", value: "Contact us for pricing" },
+    ],
+  },
+  trademark: {
+    title: "Trademark Registration & Advisory",
+    summary:
+      "Secure ownership of your brand identity through proper trademark search, application, and protection guidance.",
+    rows: [
+      { label: "Trademark Search & Analysis", value: "Included" },
+      { label: "Application Support", value: "Included" },
+      { label: "Brand Protection & Guidance", value: "Included" },
+      { label: "Partnership with Licensed Professionals", value: "Included" },
+      { label: "Acknowledgement Letter, Acceptance Letter & Certificate", value: "Included" },
+    ],
+    priceLabel: "₦120,000 – ₦150,000",
+  },
+  complianceAudit: {
+    title: "Brand Compliance Check & Audit",
+    summary:
+      "Full compliance audit of your brand — naming, registration, protection gaps, and next steps.",
+    price: "₦20,000",
+    formUrl: "",
+  },
+  printPublish: {
+    title: "Print & Publish",
+    summary:
+      "Commercial printing, books, magazines and corporate materials — plus publishing support from manuscript to finished copy.",
+    items: [
+      "Commercial Printing",
+      "Books",
+      "Magazines",
+      "Corporate Materials",
+      "Publishing Support",
+    ],
+  },
+  whyChoose: [
+    { title: "End-to-End Support", body: "One accountable team from idea to launch — strategy, identity, compliance and print." },
+    { title: "From Business Idea to Industry Leadership", body: "We meet you where you are and build with you as you grow." },
+    { title: "One Trusted Partner", body: "No juggling vendors. Branding, compliance, publishing and business support under one roof." },
+    { title: "Branding, Compliance, Publishing & Business Support Under One Roof", body: "Connected solutions instead of disconnected suppliers." },
+    { title: "Professional Execution", body: "Systems, timelines and documentation you can rely on." },
+    { title: "Long-Term Relationship Approach", body: "We build for durability — and stay with you after launch." },
+    { title: "Affordable & Scalable Solutions", body: "Clear packages that start small and scale with your ambition." },
+  ],
+  operatingModel: [
+    {
+      title: "Online & In-Person Support",
+      body: "AMDA now operates with both online support and a physical office.",
+    },
+    {
+      title: "Partner-Based Model",
+      body: "We collaborate with licensed professionals and industry experts to deliver comprehensive solutions.",
+    },
+    {
+      title: "System & Accountability",
+      body: "We prioritize professional systems and accountability, ensuring transparent communication throughout.",
+    },
+  ],
+  responseTime: "12–48 hours maximum",
+  address: "No. 5 H Plaza, Beside NNPC Filling Station, New Nyanya, Karu, Nasarawa State, Nigeria.",
+  phone: "+234 707 779 8418",
+  phoneHref: "tel:+2347077798418",
+  email: "info@amdaglobal.com",
+  coverage: "Nigeria & International (Africa)",
+  founder: {
+    name: "Jesse Hosea",
+    title: "Founder & Creative Director, AMDA Global Solutions Ltd",
+    bio: "Jesse Hosea is a branding consultant, creative professional, AI enthusiast, and entrepreneur with experience spanning branding, graphic design, printing, business development, and capacity building. With a background in Economics Education and several years of practical experience in the creative and printing industry, Jesse founded AMDA Global Solutions to help businesses build brands that are not only visually compelling but also properly positioned, protected, and prepared for growth. Through AMDA, he combines creativity, strategy, technology, and compliance to help businesses build stronger and more professional brands.",
+    photo: "/founder.webp",
+    linkedin: "https://www.linkedin.com/in/jessehosea/",
+  },
+  team: [],
+  testimonials: [
+    {
+      id: "t-written-1",
+      client: "Client Name",
+      project: "Brand Identity",
+      kind: "written",
+      quote: "Testimonial placeholder — AMDA will supply written testimonials, screenshots, photos, video and voice-note testimonials. This card shows the written format.",
+    },
+    {
+      id: "t-screenshot-1",
+      client: "Client Name",
+      project: "Compliance Support",
+      kind: "screenshot",
+      quote: "Screenshot testimonial placeholder — swap the media field with a real testimonial screenshot.",
+      media: "/testimonial-outreach.webp",
+    },
+    {
+      id: "t-delivery-1",
+      client: "Client Name",
+      project: "Commercial Printing",
+      kind: "delivery",
+      quote: "Delivery / project photo placeholder — swap with a real delivery photograph.",
+      media: "/testimonial-delivery.webp",
+    },
+    {
+      id: "t-video-1",
+      client: "Client Name",
+      project: "Brand Strategy",
+      kind: "video",
+      quote: "Video testimonial placeholder — upload the client video file and set its media path here.",
+      media: "",
+    },
+    {
+      id: "t-audio-1",
+      client: "Client Name",
+      project: "Publishing Support",
+      kind: "audio",
+      quote: "Voice-note testimonial placeholder — upload the client voice note and set its media path here.",
+      media: "",
+    },
+  ],
+  clientCount: "",
+};

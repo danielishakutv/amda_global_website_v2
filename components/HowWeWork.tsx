@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Search,
   PenTool,
@@ -11,6 +13,7 @@ import {
 } from "lucide-react";
 import { Reveal } from "./ui/Reveal";
 import { SectionTag } from "./ui/SectionTag";
+import { useSiteContent } from "@/lib/content-store";
 
 const STEPS = [
   {
@@ -40,45 +43,20 @@ const STEPS = [
   },
 ];
 
-const OPERATING_MODEL = [
-  {
-    icon: Wifi,
-    title: "Remote-First",
-    body: "We operate as a lean, remote-first agency, enabling efficient service delivery without geographical limitations.",
-  },
-  {
-    icon: Handshake,
-    title: "Partner-Based Model",
-    body: "We collaborate with licensed professionals and industry experts to deliver comprehensive solutions.",
-  },
-  {
-    icon: GitBranch,
-    title: "Systems & Accountability",
-    body: "We prioritize professional systems and accountability, ensuring transparent communication throughout.",
-  },
-];
+const OPERATING_ICONS = [Wifi, Handshake, GitBranch];
 
 export function HowWeWork() {
+  const content = useSiteContent();
+  const OPERATING_MODEL = content.operatingModel.map((m, i) => ({
+    ...m,
+    icon: OPERATING_ICONS[i % OPERATING_ICONS.length],
+  }));
   return (
     <section
       id="process"
       aria-labelledby="process-heading"
-      className="section relative overflow-hidden bg-navy-deep text-white"
+      className="section bg-navy-deep text-white"
     >
-      <div aria-hidden className="absolute inset-0 dot-pattern opacity-25" />
-      <div
-        aria-hidden
-        className="gradient-orb"
-        style={{
-          bottom: "-10rem",
-          left: "-10rem",
-          height: "30rem",
-          width: "30rem",
-          background: "rgb(var(--color-teal))",
-          opacity: 0.3,
-        }}
-      />
-
       <div className="container relative">
         <div className="mx-auto max-w-3xl text-center">
           <Reveal>
@@ -104,7 +82,7 @@ export function HowWeWork() {
           {/* vertical rail */}
           <span
             aria-hidden
-            className="absolute left-[1.4rem] top-2 hidden h-[calc(100%-1rem)] w-px bg-gradient-to-b from-gold/60 via-gold/30 to-transparent sm:block"
+            className="absolute left-[1.4rem] top-2 hidden h-[calc(100%-1rem)] w-px bg-gold/30 sm:block"
           />
 
           {STEPS.map((step, i) => (

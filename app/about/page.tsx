@@ -4,61 +4,29 @@ import {
   Eye,
   Target,
   ShieldCheck,
-  Sparkles,
-  Compass,
-  Handshake,
-  HeartHandshake,
-  Globe2,
   Brain,
   Layers,
   PenTool,
-  ScrollText,
   Users,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
-import { WhatsAppWidget } from "@/components/WhatsAppWidget";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionTag } from "@/components/ui/SectionTag";
+import { StoryBlock, ValuesBlock } from "@/components/AboutSections";
+
+const Footer = dynamic(() => import("@/components/Footer").then((m) => m.Footer));
+const Founder = dynamic(() => import("@/components/Founder").then((m) => m.Founder));
+const WhatsAppWidget = dynamic(
+  () => import("@/components/WhatsAppWidget").then((m) => m.WhatsAppWidget),
+  { ssr: false }
+);
 
 export const metadata: Metadata = {
   title: "About Us — A Brand Strategy & Compliance Advisory Firm",
   description:
     "Learn how AMDA Global Solution helps businesses across Nigeria and Africa build brands that are clear, credible, scalable, and legally protected. Our story, vision, mission, and core values.",
 };
-
-const VALUES = [
-  {
-    icon: ShieldCheck,
-    title: "Integrity Above All",
-    body: "We do what we say, and we say what we mean. Every recommendation, deliverable, and conversation is rooted in honesty — even when it's not the easy path.",
-  },
-  {
-    icon: Compass,
-    title: "Strategy-Led Thinking",
-    body: "We never start with execution. Every solution begins with a clear understanding of the business, the market, and the long-term vision behind the brand.",
-  },
-  {
-    icon: ScrollText,
-    title: "Compliance by Design",
-    body: "Brand protection isn't an afterthought — it's woven in from day one. We build brands that are not only beautiful, but legally defensible and built to last.",
-  },
-  {
-    icon: HeartHandshake,
-    title: "Client Partnership",
-    body: "We work as an extension of your team. Your business goals become ours, and your wins become the reason we show up the next day.",
-  },
-  {
-    icon: Sparkles,
-    title: "Creative Excellence",
-    body: "Good is not good enough. We hold our craft to a standard that reflects the kind of brands we believe Africa deserves to put forward.",
-  },
-  {
-    icon: Globe2,
-    title: "African Confidence",
-    body: "We build with cultural authenticity and global standards in equal measure — proving that African brands can compete and lead anywhere in the world.",
-  },
-];
 
 const EXPERTISE_AREAS = [
   {
@@ -83,45 +51,13 @@ const EXPERTISE_AREAS = [
   },
 ];
 
-const COMMITMENTS = [
-  "Transparent scope, timelines, and pricing — always.",
-  "Clear ownership of every deliverable, with no hand-off gaps.",
-  "Compliance and legal soundness built into every brand we build.",
-  "Documentation and governance that outlive the engagement.",
-];
-
 export default function AboutPage() {
   return (
     <>
       <Navbar />
       <main>
         {/* ---------- Page Hero ---------- */}
-        <section className="relative isolate overflow-hidden bg-navy-deep pb-24 pt-36 text-white sm:pt-44">
-          <div className="absolute inset-0 -z-10">
-            <div className="dot-pattern absolute inset-0 opacity-30" />
-            <div className="absolute inset-x-0 top-0 h-96 bg-radial-gold" />
-            <div
-              className="gradient-orb"
-              style={{
-                top: "-6rem",
-                right: "-8rem",
-                height: "26rem",
-                width: "26rem",
-                background: "rgb(var(--color-gold))",
-              }}
-            />
-            <div
-              className="gradient-orb"
-              style={{
-                bottom: "-12rem",
-                left: "-10rem",
-                height: "30rem",
-                width: "30rem",
-                background: "rgb(var(--color-teal))",
-              }}
-            />
-          </div>
-
+        <section className="bg-navy-deep pb-24 pt-36 text-white sm:pt-44">
           <div className="container relative">
             <Reveal>
               <div className="flex justify-center">
@@ -158,81 +94,11 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* ---------- Story ---------- */}
-        <section className="section bg-cream">
-          <div
-            aria-hidden
-            className="dot-pattern-dark absolute inset-0 opacity-50 [mask-image:radial-gradient(ellipse_at_top,black_20%,transparent_70%)]"
-          />
-          <div className="container relative">
-            <div className="grid gap-14 lg:grid-cols-12 lg:gap-20">
-              <div className="lg:col-span-5">
-                <Reveal>
-                  <SectionTag>Our Story</SectionTag>
-                </Reveal>
-                <Reveal delay={0.05}>
-                  <h2 className="mt-6 font-display text-display-md font-semibold leading-[1.06] tracking-tight text-navy">
-                    We sit at the intersection of branding, strategy, and brand protection.
-                  </h2>
-                </Reveal>
-              </div>
+        {/* ---------- Story (guide §4, editable in Admin → Story) ---------- */}
+        <StoryBlock />
 
-              <div className="space-y-6 text-base leading-relaxed text-muted lg:col-span-7">
-                <Reveal delay={0.1}>
-                  <p>
-                    AMDA Global Solution exists because too many promising African brands are built
-                    without the foundations they need to grow — strategy that is unclear, identity
-                    that is inconsistent, and protection that is left until something goes wrong.
-                  </p>
-                </Reveal>
-                <Reveal delay={0.15}>
-                  <p>
-                    We were built to change that. From the very first conversation, we work with
-                    business owners to design brands that can be defended, scaled, and trusted —
-                    brands that move with intention rather than reaction.
-                  </p>
-                </Reveal>
-                <Reveal delay={0.2}>
-                  <p>
-                    Today, we serve businesses across Nigeria and the wider African continent as a
-                    lean, remote-first advisory firm — combining strategy-led thinking, creative
-                    excellence, and compliance-aligned solutions with a partner-based service model.
-                  </p>
-                </Reveal>
-
-                <Reveal delay={0.25}>
-                  <ul className="mt-8 space-y-3">
-                    {COMMITMENTS.map((c) => (
-                      <li key={c} className="flex items-start gap-3 text-navy">
-                        <span className="mt-1 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-gold/20 text-gold-deep">
-                          <ArrowRight size={11} strokeWidth={3} />
-                        </span>
-                        <span className="text-sm font-medium">{c}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </Reveal>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ---------- Vision + Mission ---------- */}
-        <section className="section relative overflow-hidden bg-navy text-white">
-          <div aria-hidden className="absolute inset-0 dot-pattern opacity-30" />
-          <div
-            aria-hidden
-            className="gradient-orb"
-            style={{
-              top: "10%",
-              right: "-12rem",
-              height: "26rem",
-              width: "26rem",
-              background: "rgb(var(--color-gold))",
-              opacity: 0.22,
-            }}
-          />
-
+        {/* ---------- Vision + Mission (guide §5) ---------- */}
+        <section className="section bg-navy text-white">
           <div className="container relative">
             <div className="mx-auto max-w-3xl text-center">
               <Reveal>
@@ -269,7 +135,7 @@ export default function AboutPage() {
               </Reveal>
 
               <Reveal delay={0.12}>
-                <article className="h-full overflow-hidden rounded-3xl border border-gold/30 bg-gradient-to-br from-gold/15 via-navy-soft to-navy-deep p-9">
+                <article className="h-full overflow-hidden rounded-3xl border border-gold/30 bg-navy-deep p-9">
                   <div className="flex items-center gap-3">
                     <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gold text-white">
                       <Target size={20} />
@@ -280,7 +146,7 @@ export default function AboutPage() {
                   </div>
                   <p className="mt-7 font-display text-2xl leading-snug text-white sm:text-3xl">
                     Help businesses build{" "}
-                    <span className="italic text-gold">intentional, scalable, and protected</span>{" "}
+                    <span className="italic text-gold">intentional, sustainable, and protected</span>{" "}
                     brands.
                   </p>
                   <p className="mt-5 text-sm leading-relaxed text-white/75">
@@ -294,64 +160,14 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* ---------- Core Values ---------- */}
-        <section className="section relative overflow-hidden bg-cream">
-          <div className="container relative">
-            <div className="mx-auto max-w-3xl text-center">
-              <Reveal>
-                <SectionTag>Core Beliefs &amp; Values</SectionTag>
-              </Reveal>
-              <Reveal delay={0.05}>
-                <h2 className="mt-6 font-display text-display-lg font-semibold leading-[1.04] tracking-tight text-navy">
-                  The principles that{" "}
-                  <span className="italic text-gold-deep">shape our work</span>.
-                </h2>
-              </Reveal>
-              <Reveal delay={0.1}>
-                <p className="mt-5 text-base text-muted sm:text-lg">
-                  These aren&apos;t poster words. They are the standards we use to make decisions —
-                  about who we work with, how we deliver, and what we refuse to compromise on.
-                </p>
-              </Reveal>
-            </div>
+        {/* ---------- Core Values (guide §5: Integrity • Excellence • Impact) ---------- */}
+        <ValuesBlock />
 
-            <ul className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-              {VALUES.map((v, i) => (
-                <Reveal key={v.title} as="li" delay={0.05 + (i % 3) * 0.07}>
-                  <article className="card-light group h-full">
-                    <div className="flex items-center justify-between">
-                      <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gold/15 text-gold-deep transition-colors group-hover:bg-navy group-hover:text-gold">
-                        <v.icon size={20} />
-                      </span>
-                      <span className="font-mono text-xs text-muted/50">
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                    </div>
-                    <h3 className="mt-6 font-display text-xl font-semibold text-navy">{v.title}</h3>
-                    <p className="mt-3 text-sm leading-relaxed text-muted">{v.body}</p>
-                  </article>
-                </Reveal>
-              ))}
-            </ul>
-          </div>
-        </section>
+        {/* ---------- Founder (guide §12) ---------- */}
+        <Founder />
 
         {/* ---------- Our Team ---------- */}
-        <section className="section relative overflow-hidden bg-navy-deep text-white">
-          <div aria-hidden className="absolute inset-0 dot-pattern opacity-25" />
-          <div
-            aria-hidden
-            className="gradient-orb"
-            style={{
-              bottom: "-12rem",
-              right: "-10rem",
-              height: "30rem",
-              width: "30rem",
-              background: "rgb(var(--color-teal))",
-              opacity: 0.28,
-            }}
-          />
-
+        <section className="section bg-navy-deep text-white">
           <div className="container relative">
             <div className="mx-auto max-w-3xl text-center">
               <Reveal>

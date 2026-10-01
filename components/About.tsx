@@ -1,21 +1,22 @@
-import { ArrowRight, Globe2, Wifi, Eye, Target } from "lucide-react";
+"use client";
+
+import { ArrowRight, Globe2, Wifi, Eye, Target, Gem } from "lucide-react";
 import { Reveal } from "./ui/Reveal";
 import { SectionTag } from "./ui/SectionTag";
+import { useSiteContent } from "@/lib/content-store";
 
 export function About() {
+  const content = useSiteContent();
+  const { whoWeAre, vision, mission, coreValues, coverage } = content;
+
   return (
     <section id="about" aria-labelledby="about-heading" className="section bg-cream">
-      <div
-        aria-hidden
-        className="dot-pattern-dark absolute inset-0 opacity-60 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_70%)]"
-      />
-
       <div className="container relative">
         <div className="grid items-start gap-14 lg:grid-cols-12 lg:gap-20">
-          {/* Left column — heading + body */}
+          {/* Left column — guide §3 Who We Are, verbatim */}
           <div className="lg:col-span-7">
             <Reveal>
-              <SectionTag>About Us</SectionTag>
+              <SectionTag>Who We Are</SectionTag>
             </Reveal>
 
             <Reveal delay={0.05}>
@@ -23,35 +24,28 @@ export function About() {
                 id="about-heading"
                 className="mt-6 font-display text-display-lg font-semibold leading-[1.04] tracking-tight text-navy"
               >
-                Who We Are
+                {whoWeAre.heading}
               </h2>
             </Reveal>
 
             <Reveal delay={0.1}>
               <p className="mt-5 max-w-xl text-lg font-medium text-navy/80 sm:text-xl">
-                A Brand Strategy, Experience &amp; Compliance Advisory Firm
+                {whoWeAre.sub}
               </p>
             </Reveal>
 
             <Reveal delay={0.15}>
               <div className="mt-8 space-y-5 text-base leading-relaxed text-muted">
-                <p>
-                  AMDA Global Solution is helping businesses build brands that are clear, credible,
-                  scalable, and legally protected. We work with startups, SMEs, personal brands, and
-                  growing organizations across Nigeria and Africa.
-                </p>
-                <p>
-                  We sit at the intersection of branding, strategy, and brand protection. Our
-                  services ensure that brands are not only visually appealing, but also strategically
-                  positioned and legally secure for long-term growth.
-                </p>
+                {whoWeAre.body.map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
               </div>
             </Reveal>
 
             <Reveal delay={0.2}>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Badge icon={<Globe2 size={14} />}>Nigeria &amp; Africa</Badge>
-                <Badge icon={<Wifi size={14} />}>Remote-First</Badge>
+                <Badge icon={<Globe2 size={14} />}>{coverage}</Badge>
+                <Badge icon={<Wifi size={14} />}>Online &amp; In-Person Support</Badge>
               </div>
             </Reveal>
 
@@ -66,7 +60,7 @@ export function About() {
             </Reveal>
           </div>
 
-          {/* Right column — vision/mission cards */}
+          {/* Right column — vision / mission / values (guide §5) */}
           <div className="space-y-5 lg:col-span-5">
             <Reveal delay={0.1}>
               <article className="card-light overflow-hidden border-navy/10 bg-white">
@@ -78,9 +72,7 @@ export function About() {
                     Our Vision
                   </span>
                 </div>
-                <p className="mt-5 font-display text-2xl leading-snug text-navy">
-                  To become the number one trusted African brand partner.
-                </p>
+                <p className="mt-5 font-display text-2xl leading-snug text-navy">{vision}</p>
               </article>
             </Reveal>
 
@@ -94,9 +86,22 @@ export function About() {
                     Our Mission
                   </span>
                 </div>
-                <p className="mt-5 font-display text-xl leading-snug text-cream">
-                  To help businesses build intentional, scalable, and protected brands through
-                  strategy-led thinking, creative excellence, and compliance-aligned solutions.
+                <p className="mt-5 font-display text-xl leading-snug text-cream">{mission}</p>
+              </article>
+            </Reveal>
+
+            <Reveal delay={0.24}>
+              <article className="card-light overflow-hidden border-navy/10 bg-white">
+                <div className="flex items-center gap-3">
+                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-gold/15 text-gold-deep">
+                    <Gem size={18} />
+                  </span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+                    Core Values
+                  </span>
+                </div>
+                <p className="mt-5 font-display text-xl leading-snug text-navy">
+                  {coreValues.join("  •  ")}
                 </p>
               </article>
             </Reveal>
@@ -115,9 +120,9 @@ export function About() {
                   Serving Businesses Across Nigeria &amp; International Markets
                 </h3>
                 <p className="mt-4 max-w-2xl text-muted">
-                  We operate as a lean, remote-first agency with a partner-based service model,
-                  prioritizing systems, professionalism, and accountability for efficient service
-                  delivery.
+                  Online &amp; in-person support with a partner-based service model —
+                  prioritizing systems, professionalism, and accountability for efficient
+                  service delivery.
                 </p>
               </div>
               <div className="lg:col-span-5 lg:text-right">

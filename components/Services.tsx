@@ -13,120 +13,24 @@ import {
   Building2,
   Stamp,
   ClipboardCheck,
-  FileSearch,
+  Printer,
+  ExternalLink,
 } from "lucide-react";
 import { Reveal } from "./ui/Reveal";
 import { SectionTag } from "./ui/SectionTag";
+import { useSiteContent } from "@/lib/content-store";
 
-type Tab = "branding" | "protection";
+type Tab = "brand" | "protect" | "comply" | "print";
 
-const PACKAGES = [
-  {
-    name: "Starter Package",
-    price: "₦20,000",
-    description: "Perfect for businesses starting their brand journey",
-    features: ["Brand audit", "Content direction", "2 social media designs"],
-    featured: false,
-  },
-  {
-    name: "Growth Package",
-    price: "₦40,000",
-    description: "Ideal for businesses ready to level up their brand",
-    features: [
-      "Brand refresh or identity",
-      "4 social media designs with captions",
-      "30-day content plan",
-    ],
-    featured: true,
-  },
-  {
-    name: "Authority Package",
-    price: "₦60,000",
-    description: "Complete brand system for established businesses",
-    features: [
-      "Full brand system",
-      "Brand positioning strategy",
-      "6 weeks of content support",
-    ],
-    featured: false,
-  },
-];
-
-const ADDITIONAL_BRANDING = [
-  "Brand strategy & positioning",
-  "Brand identity systems & guidelines",
-  "Content direction & communication frameworks",
-  "Printing of branded materials",
-];
-
-type ProtectionService = {
-  id: string;
-  icon: React.ElementType;
-  title: string;
-  summary: string;
-  rows: { label: string; value: string }[];
-  highlights?: string[];
-  priceLabel?: string;
-};
-
-const PROTECTION_SERVICES: ProtectionService[] = [
-  {
-    id: "cac",
-    icon: Building2,
-    title: "Business Name Registration (CAC)",
-    summary:
-      "Register your business correctly with the Corporate Affairs Commission and start operating with confidence.",
-    rows: [
-      { label: "Business Name Registration", value: "₦35,000" },
-      { label: "Limited Liability Company (1 million shares)", value: "₦110,000" },
-      { label: "Other registration types", value: "Contact us for pricing" },
-    ],
-  },
-  {
-    id: "trademark",
-    icon: Stamp,
-    title: "Trademark Registration & Advisory",
-    summary:
-      "Secure ownership of your brand identity through proper trademark search, application, and protection guidance.",
-    rows: [
-      { label: "Trademark Search and Analysis", value: "Included" },
-      { label: "Application Support", value: "Included" },
-      { label: "Brand Protection Guidance", value: "Included" },
-      { label: "Partnership with licensed professionals", value: "Included" },
-    ],
-    priceLabel: "₦120,000 – ₦150,000",
-  },
-  {
-    id: "compliance",
-    icon: ClipboardCheck,
-    title: "Brand Compliance Checks & Audits",
-    summary:
-      "Comprehensive compliance audit and governance framework so your brand operates within the right legal lanes.",
-    rows: [
-      { label: "Full compliance audit", value: "Included" },
-      { label: "Governance framework", value: "Included" },
-      { label: "Ongoing advisory support", value: "Included" },
-      { label: "Legal partnership coordination", value: "Included" },
-    ],
-    priceLabel: "₦250,000+",
-  },
-  {
-    id: "documentation",
-    icon: FileSearch,
-    title: "Documentation & Regulatory Guidance",
-    summary:
-      "Pre-launch checks and risk assessments that confirm your brand name is available, defensible, and ready.",
-    rows: [
-      { label: "Brand Name Availability Check", value: "Included" },
-      { label: "Risk Assessment Report", value: "Included" },
-      { label: "Recommendations for brand protection", value: "Included" },
-    ],
-    priceLabel: "₦40,000",
-  },
+const TABS: { id: Tab; label: string; icon: React.ReactNode; tabId: string; panelId: string }[] = [
+  { id: "brand", label: "Brand", icon: <Palette size={16} />, tabId: "tab-brand", panelId: "panel-brand" },
+  { id: "protect", label: "Protect", icon: <ShieldCheck size={16} />, tabId: "tab-protect", panelId: "panel-protect" },
+  { id: "comply", label: "Comply", icon: <ClipboardCheck size={16} />, tabId: "tab-comply", panelId: "panel-comply" },
+  { id: "print", label: "Print & Publish", icon: <Printer size={16} />, tabId: "tab-print", panelId: "panel-print" },
 ];
 
 export function Services() {
-  const [tab, setTab] = useState<Tab>("branding");
+  const [tab, setTab] = useState<Tab>("brand");
 
   return (
     <section
@@ -149,8 +53,15 @@ export function Services() {
           </Reveal>
           <Reveal delay={0.1}>
             <p className="mt-5 text-base text-muted sm:text-lg">
-              Comprehensive solutions ensuring your brand is visually appealing, strategically
-              positioned, and legally secure for long-term growth.
+              Brand, Protect, Comply, Print &amp; Publish — connected solutions ensuring
+              your brand is visually appealing, strategically positioned, and legally
+              secure for long-term growth.
+            </p>
+          </Reveal>
+          <Reveal delay={0.14}>
+            <p className="mx-auto mt-4 max-w-2xl text-sm text-muted">
+              01 — Brand: Brand Strategy • Visual Identity • Brand Consultancy &nbsp;·&nbsp;
+              02 — Protect: Trademark Support • Brand Protection • Brand Risk Checks
             </p>
           </Reveal>
         </div>
@@ -161,26 +72,20 @@ export function Services() {
             <div
               role="tablist"
               aria-label="Service categories"
-              className="relative inline-flex w-full max-w-2xl items-center rounded-full border border-navy/10 bg-white p-1.5 shadow-card"
+              className="relative grid w-full max-w-3xl grid-cols-2 items-center gap-1 rounded-3xl border border-navy/10 bg-white p-1.5 shadow-card sm:grid-cols-4 sm:rounded-full"
             >
-              <TabButton
-                active={tab === "branding"}
-                onClick={() => setTab("branding")}
-                id="tab-branding"
-                controls="panel-branding"
-                icon={<Palette size={16} />}
-              >
-                Branding &amp; Experience
-              </TabButton>
-              <TabButton
-                active={tab === "protection"}
-                onClick={() => setTab("protection")}
-                id="tab-protection"
-                controls="panel-protection"
-                icon={<ShieldCheck size={16} />}
-              >
-                Brand Protection &amp; Compliance
-              </TabButton>
+              {TABS.map((t) => (
+                <TabButton
+                  key={t.id}
+                  active={tab === t.id}
+                  onClick={() => setTab(t.id)}
+                  id={t.tabId}
+                  controls={t.panelId}
+                  icon={t.icon}
+                >
+                  {t.label}
+                </TabButton>
+              ))}
             </div>
           </div>
         </Reveal>
@@ -188,33 +93,21 @@ export function Services() {
         {/* Tab Panels */}
         <div className="mt-14">
           <AnimatePresence mode="wait">
-            {tab === "branding" ? (
-              <motion.div
-                key="branding"
-                role="tabpanel"
-                id="panel-branding"
-                aria-labelledby="tab-branding"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.4 }}
-              >
-                <BrandingPanel />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="protection"
-                role="tabpanel"
-                id="panel-protection"
-                aria-labelledby="tab-protection"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.4 }}
-              >
-                <ProtectionPanel />
-              </motion.div>
-            )}
+            <motion.div
+              key={tab}
+              role="tabpanel"
+              id={TABS.find((t) => t.id === tab)?.panelId}
+              aria-labelledby={TABS.find((t) => t.id === tab)?.tabId}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4 }}
+            >
+              {tab === "brand" && <BrandingPanel />}
+              {tab === "protect" && <ProtectionPanel />}
+              {tab === "comply" && <ComplyPanel />}
+              {tab === "print" && <PrintPanel />}
+            </motion.div>
           </AnimatePresence>
         </div>
       </div>
@@ -247,7 +140,7 @@ function TabButton({
       aria-selected={active}
       aria-controls={controls}
       onClick={onClick}
-      className="relative flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-3 text-xs font-semibold transition-colors sm:px-5 sm:text-sm"
+      className="relative flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-3 text-xs font-semibold transition-colors sm:px-4 sm:text-sm"
     >
       {active && (
         <motion.span
@@ -262,44 +155,26 @@ function TabButton({
   );
 }
 
-/* ---------- Branding Panel ---------- */
+/* ---------- 01 Brand: Visual Identity Packages (guide §6) ---------- */
 
 function BrandingPanel() {
+  const content = useSiteContent();
   return (
     <div>
       <p className="mx-auto max-w-2xl text-center text-base text-muted">
-        We help brands define who they are, how they communicate, and how they show up across all
-        touchpoints.
+        Brand Strategy • Visual Identity • Brand Consultancy — presented as three
+        progressive packages.
       </p>
 
       <div className="mt-12 grid gap-6 lg:grid-cols-3">
-        {PACKAGES.map((pkg) => (
-          <PackageCard key={pkg.name} {...pkg} />
+        {content.packages.map((pkg, i) => (
+          <PackageCard key={pkg.id} name={pkg.name} price={pkg.price} description={pkg.description} features={pkg.features} featured={i === 1} />
         ))}
       </div>
 
-      <div className="mt-16 rounded-3xl border border-navy/10 bg-white p-8 shadow-card sm:p-10">
-        <div className="grid gap-8 lg:grid-cols-12">
-          <div className="lg:col-span-4">
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-gold-deep">
-              Beyond Packages
-            </span>
-            <h3 className="mt-3 font-display text-2xl font-semibold leading-snug text-navy">
-              Additional Branding Services
-            </h3>
-          </div>
-          <ul className="grid gap-4 sm:grid-cols-2 lg:col-span-8">
-            {ADDITIONAL_BRANDING.map((item) => (
-              <li key={item} className="flex items-start gap-3 text-navy">
-                <span className="mt-1 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-gold/20 text-gold-deep">
-                  <Check size={12} strokeWidth={3} />
-                </span>
-                <span className="text-sm font-medium">{item}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+      <p className="mt-8 text-center text-sm text-muted">
+        Display order: Starter → Growth → Authority. Each package has a clear CTA.
+      </p>
     </div>
   );
 }
@@ -310,7 +185,13 @@ function PackageCard({
   description,
   features,
   featured,
-}: (typeof PACKAGES)[number]) {
+}: {
+  name: string;
+  price: string;
+  description: string;
+  features: string[];
+  featured: boolean;
+}) {
   return (
     <article
       className={`relative flex flex-col overflow-hidden rounded-3xl p-8 transition-all duration-300 ${
@@ -364,23 +245,42 @@ function PackageCard({
   );
 }
 
-/* ---------- Protection Panel ---------- */
+/* ---------- 02 Protect: CAC + Trademark (guide §7A–B) ---------- */
 
 function ProtectionPanel() {
-  const [openId, setOpenId] = useState<string | null>(PROTECTION_SERVICES[0].id);
+  const content = useSiteContent();
+  const [openId, setOpenId] = useState<string | null>("cac");
+
+  const services = [
+    {
+      id: "cac",
+      icon: Building2,
+      title: content.cac.title,
+      summary: content.cac.summary,
+      rows: content.cac.rows,
+    },
+    {
+      id: "trademark",
+      icon: Stamp,
+      title: content.trademark.title,
+      summary: content.trademark.summary,
+      rows: content.trademark.rows,
+      priceLabel: content.trademark.priceLabel,
+    },
+  ];
 
   return (
     <div>
       <p className="mx-auto max-w-2xl text-center text-base text-muted">
-        Preventive brand protection and compliance services delivered in partnership with licensed
-        legal professionals.
+        Trademark Support • Brand Protection • Brand Risk Checks — delivered in
+        partnership with licensed legal professionals.
       </p>
 
       <ul className="mx-auto mt-12 max-w-4xl space-y-4">
-        {PROTECTION_SERVICES.map((svc) => (
+        {services.map((svc) => (
           <ProtectionCard
             key={svc.id}
-            svc={svc}
+            svc={svc as Parameters<typeof ProtectionCard>[0]["svc"]}
             open={openId === svc.id}
             onToggle={() => setOpenId(openId === svc.id ? null : svc.id)}
           />
@@ -397,14 +297,6 @@ function ProtectionPanel() {
           facilitative support in collaboration with licensed legal practitioners.
         </p>
       </div>
-
-      <div className="mt-10 text-center">
-        <p className="mb-4 text-sm text-muted">Need a custom solution?</p>
-        <a href="#contact" className="btn-primary">
-          Let&apos;s discuss your project
-          <ArrowRight size={16} strokeWidth={2.5} />
-        </a>
-      </div>
     </div>
   );
 }
@@ -414,7 +306,14 @@ function ProtectionCard({
   open,
   onToggle,
 }: {
-  svc: ProtectionService;
+  svc: {
+    id?: string;
+    icon: React.ElementType;
+    title: string;
+    summary: string;
+    rows: { label: string; value: string }[];
+    priceLabel?: string;
+  };
   open: boolean;
   onToggle: () => void;
 }) {
@@ -504,5 +403,110 @@ function ProtectionCard({
         )}
       </AnimatePresence>
     </li>
+  );
+}
+
+/* ---------- 03 Comply: Brand Compliance Check & Audit ₦20,000 + Google Form (guide §7C) ---------- */
+
+function ComplyPanel() {
+  const content = useSiteContent();
+  const audit = content.complianceAudit;
+  return (
+    <div className="mx-auto max-w-4xl">
+      <p className="mx-auto max-w-2xl text-center text-base text-muted">
+        Business Registration • NGO Registration • Compliance Support — plus a
+        standalone compliance audit for existing brands.
+      </p>
+
+      <div className="mt-12 overflow-hidden rounded-3xl border border-gold bg-navy text-cream shadow-card">
+        <div className="grid gap-8 p-8 sm:p-10 lg:grid-cols-12">
+          <div className="lg:col-span-7">
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">
+              Brand Compliance Check &amp; Audit
+            </span>
+            <h3 className="mt-3 font-display text-2xl font-semibold sm:text-3xl">{audit.title}</h3>
+            <p className="mt-4 text-sm leading-relaxed text-white/75 sm:text-base">{audit.summary}</p>
+            <ul className="mt-6 space-y-3 text-sm text-white/85">
+              <li className="flex items-start gap-3">
+                <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-gold/20 text-gold">
+                  <Check size={12} strokeWidth={3} />
+                </span>
+                Full Compliance Audit
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-gold/20 text-gold">
+                  <Check size={12} strokeWidth={3} />
+                </span>
+                Gap report + prioritized next steps
+              </li>
+            </ul>
+          </div>
+          <div className="lg:col-span-5">
+            <div className="h-full rounded-3xl border border-white/10 bg-white/[0.05] p-7 backdrop-blur-md">
+              <span className="block text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-white/55">
+                Investment
+              </span>
+              <span className="mt-1 block font-display text-4xl font-semibold text-gold">
+                {audit.price}
+              </span>
+              {audit.formUrl ? (
+                <a
+                  href={audit.formUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gold px-6 py-3.5 text-sm font-semibold text-white transition-all hover:bg-gold-soft"
+                >
+                  Request the audit
+                  <ExternalLink size={15} />
+                </a>
+              ) : (
+                <div className="mt-6 rounded-2xl border border-dashed border-gold/40 bg-gold/10 p-4 text-sm text-white/80">
+                  Google Form placeholder — AMDA will supply the form link and it
+                  will appear here as “Request the audit”.
+                </div>
+              )}
+              <a
+                href="#contact"
+                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/15 px-6 py-3.5 text-sm font-semibold text-white/85 transition-colors hover:border-white/30 hover:bg-white/5"
+              >
+                Or contact us directly
+                <ArrowRight size={15} strokeWidth={2.5} />
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- 04 Print & Publish (guide §2.04) ---------- */
+
+function PrintPanel() {
+  const content = useSiteContent();
+  const pp = content.printPublish;
+  return (
+    <div className="mx-auto max-w-4xl">
+      <p className="mx-auto max-w-2xl text-center text-base text-muted">{pp.summary}</p>
+      <ul className="mt-12 grid gap-4 sm:grid-cols-2">
+        {pp.items.map((item) => (
+          <li
+            key={item}
+            className="flex items-center gap-4 rounded-3xl border border-navy/10 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-card"
+          >
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-navy text-gold">
+              <Printer size={18} />
+            </span>
+            <span className="font-display text-lg font-semibold text-navy">{item}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-10 text-center">
+        <a href="#contact" className="btn-primary">
+          Discuss a print project
+          <ArrowRight size={16} strokeWidth={2.5} />
+        </a>
+      </div>
+    </div>
   );
 }

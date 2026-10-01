@@ -1,8 +1,10 @@
-"use client";
+﻿"use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowRight, Compass, Sparkles, ShieldCheck } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { AnimatedCounter } from "./ui/AnimatedCounter";
+import { useSiteContent } from "@/lib/content-store";
 
 const STATS = [
   { value: "100+", label: "Brands Built" },
@@ -10,170 +12,123 @@ const STATS = [
   { value: "360°", label: "Brand Solutions" },
 ];
 
+const FOCUS = [
+  "Branding",
+  "Brand Protection",
+  "Business Compliance",
+  "Printing & Publishing",
+  "Brand Consultancy",
+];
+
 export function Hero() {
+  const content = useSiteContent();
+  const hero = content.hero;
+
   return (
     <section
       id="top"
       aria-label="Hero"
-      className="relative isolate min-h-screen overflow-hidden bg-navy-deep pb-24 pt-32 text-white sm:pt-36 lg:pt-40"
+      className="relative overflow-hidden bg-navy-deep text-white"
     >
-      {/* Background decoration */}
-      <div className="absolute inset-0 -z-10">
-        <div className="dot-pattern absolute inset-0 opacity-40" />
-        <div className="absolute inset-x-0 top-0 h-96 bg-radial-gold" />
-        <div
-          className="gradient-orb"
-          style={{ top: "-8rem", right: "-6rem", height: "28rem", width: "28rem", background: "rgb(var(--color-gold))" }}
-        />
-        <div
-          className="gradient-orb"
-          style={{ bottom: "-12rem", left: "-8rem", height: "32rem", width: "32rem", background: "rgb(var(--color-teal))" }}
-        />
-        <motion.div
-          aria-hidden
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1.5 }}
-          className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent"
-        />
-      </div>
+      {/* Supplied background image, held back under layered navy overlays so
+          type stays readable — darker at the top for the transparent navbar,
+          softer in the middle, grounding at the bottom. */}
+      {hero.backgroundImage ? (
+        <>
+          <Image
+            src={hero.backgroundImage}
+            alt=""
+            aria-hidden
+            fill
+            priority
+            sizes="100vw"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          {/* Base dim so image never looks raw */}
+          <div aria-hidden className="absolute inset-0 bg-navy-deep/70" />
+          {/* Top-down blend: heavy at the top for nav plus headline, lifts in middle, settles darker at bottom */}
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-b from-navy-deep/90 via-navy-deep/30 to-navy-deep/80"
+          />
+          {/* Extra top scrim just behind navbar so upper area never looks like no overlay */}
+          <div
+            aria-hidden
+            className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-navy-deep via-navy-deep/60 to-transparent"
+          />
+          {/* Soft left shade so headline always sits on dark */}
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-r from-navy-deep/50 via-transparent to-transparent"
+          />
+        </>
+      ) : null}
 
-      <div className="container">
-        {/* Tag */}
+      <div className="container relative pb-20 pt-32 sm:pb-24 sm:pt-40">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="flex justify-center"
+          transition={{ duration: 0.6 }}
+          className="max-w-3xl"
         >
-          <span className="section-tag section-tag-dark">
-            <Sparkles size={12} className="text-gold" />
-            Brand Strategy &amp; Compliance Advisory
-          </span>
+          <p className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-gold">
+            <span aria-hidden className="h-px w-8 bg-gold" />
+            {hero.tag}
+          </p>
+
+          <h1 className="mt-6 font-display text-display-xl font-medium leading-[1.04] tracking-tight">
+            {hero.titleA}{" "}
+            <span className="italic text-gold">{hero.titleAccent1}</span>{" "}
+            {hero.titleB}{" "}
+            <span className="italic text-gold">{hero.titleAccent2}</span>{" "}
+            {hero.titleC}
+          </h1>
+
+          <p className="mt-6 max-w-2xl text-base leading-relaxed text-white/75 sm:text-lg">
+            {hero.sub}
+          </p>
+
+          <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:gap-4">
+            <a href="#contact" className="btn-primary w-full sm:w-auto">
+              {hero.primaryCta}
+              <ArrowRight size={16} strokeWidth={2.5} />
+            </a>
+            <a href="#services" className="btn-ghost-dark w-full sm:w-auto">
+              {hero.secondaryCta}
+            </a>
+          </div>
         </motion.div>
 
-        {/* Heading */}
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="mx-auto mt-8 max-w-5xl text-center font-display text-display-xl font-medium leading-[1.02] tracking-tight"
-        >
-          Building{" "}
-          <span className="relative inline-block">
-            <span className="italic text-gold">Scalable</span>
-            <span className="absolute -bottom-1 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold to-transparent" />
-          </span>{" "}
-          and{" "}
-          <span className="italic text-gold">Protected</span>
-          <br className="hidden sm:block" /> Brands
-        </motion.h1>
+        {/* Focus areas — guide §1: what AMDA stands for, plain list */}
+        <div className="mt-14 border-t border-white/15 pt-7">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
+            What we do
+          </p>
+          <ul className="mt-4 flex flex-wrap gap-x-8 gap-y-3">
+            {FOCUS.map((f) => (
+              <li key={f} className="flex items-center gap-2.5 text-sm font-medium text-white/85">
+                <span aria-hidden className="h-1.5 w-1.5 bg-gold" />
+                {f}
+              </li>
+            ))}
+          </ul>
+        </div>
 
-        {/* Subheading */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.4 }}
-          className="mx-auto mt-7 max-w-2xl text-center text-base text-white/70 sm:text-lg"
-        >
-          A brand strategy, experience, and compliance advisory firm helping businesses build
-          brands that are clear, credible, scalable, and legally protected.
-        </motion.p>
-
-        {/* CTAs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.55 }}
-          className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4"
-        >
-          <a href="#contact" className="btn-primary w-full sm:w-auto">
-            Start Your Project
-            <ArrowRight size={16} strokeWidth={2.5} />
-          </a>
-          <a href="#services" className="btn-ghost-dark w-full sm:w-auto">
-            Explore Services
-          </a>
-        </motion.div>
-
-        {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.7 }}
-          className="mx-auto mt-16 grid max-w-3xl grid-cols-3 gap-4 rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-8 backdrop-blur-md sm:gap-10 sm:px-10"
-        >
+        {/* Stats — flat row, no glass */}
+        <div className="mt-10 grid grid-cols-3 gap-6 border-t border-white/15 pt-8">
           {STATS.map((stat) => (
-            <div key={stat.label} className="text-center">
+            <div key={stat.label}>
               <AnimatedCounter
                 value={stat.value}
-                className="block font-display text-3xl font-semibold tracking-tight text-gold sm:text-4xl"
+                className="block font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl"
               />
-              <span className="mt-2 block text-[0.65rem] font-medium uppercase tracking-[0.2em] text-white/55 sm:text-xs">
+              <p className="mt-2 block text-[0.65rem] font-medium uppercase tracking-[0.2em] text-white/55 sm:text-xs">
                 {stat.label}
-              </span>
+              </p>
             </div>
           ))}
-        </motion.div>
-
-        {/* Preview cards */}
-        <div className="mt-16 grid gap-5 sm:mt-20 lg:grid-cols-2 lg:gap-6">
-          <PreviewCard
-            icon={<Compass size={20} />}
-            title="Brand Strategy & Experience"
-            body="Define who you are, how you communicate, and how you show up across all touchpoints."
-            tags={["Brand Identity", "Content Strategy", "Print Materials"]}
-            delay={0.85}
-          />
-          <PreviewCard
-            icon={<ShieldCheck size={20} />}
-            title="Brand Protection & Compliance"
-            body="Preventive brand protection and compliance services to help businesses build legally safe brands."
-            tags={["Trademark Support", "Brand Governance", "Risk Assessment"]}
-            delay={0.95}
-          />
         </div>
       </div>
     </section>
-  );
-}
-
-type PreviewProps = {
-  icon: React.ReactNode;
-  title: string;
-  body: string;
-  tags: string[];
-  delay?: number;
-};
-
-function PreviewCard({ icon, title, body, tags, delay = 0 }: PreviewProps) {
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, delay }}
-      className="card-dark group"
-    >
-      <div className="flex items-start gap-4">
-        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gold/15 text-gold transition-colors group-hover:bg-gold group-hover:text-white">
-          {icon}
-        </span>
-        <div className="flex-1">
-          <h3 className="font-display text-xl font-semibold text-white sm:text-2xl">{title}</h3>
-          <p className="mt-2 text-sm text-white/65">{body}</p>
-        </div>
-      </div>
-
-      <div className="mt-6 flex flex-wrap gap-2">
-        {tags.map((tag) => (
-          <span
-            key={tag}
-            className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[0.7rem] font-medium uppercase tracking-wider text-white/70"
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
-    </motion.article>
   );
 }

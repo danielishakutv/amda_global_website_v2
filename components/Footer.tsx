@@ -1,6 +1,9 @@
+"use client";
+
 import { Linkedin, Instagram, Facebook, Twitter, MapPin, Phone, Mail } from "lucide-react";
 import { CookiePrefsLink } from "./ui/CookiePrefsLink";
 import { Logo } from "./ui/Logo";
+import { useSiteContent } from "@/lib/content-store";
 
 const SERVICES = [
   "Brand Strategy",
@@ -26,11 +29,9 @@ const SOCIALS = [
 ];
 
 export function Footer() {
+  const site = useSiteContent();
   return (
-    <footer className="relative overflow-hidden bg-navy-deep text-cream">
-      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
-      <div aria-hidden className="dot-pattern absolute inset-0 opacity-20" />
-
+    <footer className="border-t border-white/10 bg-navy-deep text-cream">
       <div className="container relative pt-20 pb-10">
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
           {/* Brand block */}
@@ -100,19 +101,19 @@ export function Footer() {
             <ul className="mt-5 space-y-4 text-sm">
               <li className="flex items-start gap-3 text-white/70">
                 <Phone size={16} className="mt-1 text-gold" />
-                <a href="tel:+2347077798418" className="transition-colors hover:text-gold">
-                  +234 707 779 8418
+                <a href={site.phoneHref} className="transition-colors hover:text-gold">
+                  {site.phone}
                 </a>
               </li>
               <li className="flex items-start gap-3 text-white/70">
                 <Mail size={16} className="mt-1 text-gold" />
-                <a href="mailto:info@amdaglobal.com" className="transition-colors hover:text-gold">
-                  info@amdaglobal.com
+                <a href={`mailto:${site.email}`} className="transition-colors hover:text-gold">
+                  {site.email}
                 </a>
               </li>
               <li className="flex items-start gap-3 text-white/70">
                 <MapPin size={16} className="mt-1 text-gold" />
-                <span>No. 19, Famous Street, Ushafa, Abuja, Nigeria</span>
+                <span>{site.address}</span>
               </li>
             </ul>
           </div>

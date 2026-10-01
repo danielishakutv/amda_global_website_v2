@@ -101,27 +101,6 @@ body {
   }
 }
 
-/* ---------- Decorative elements ---------- */
-
-.dot-pattern {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-  background-size: 22px 22px;
-}
-
-.dot-pattern-dark {
-  background-image: radial-gradient(rgba(10, 22, 40, 0.08) 1px, transparent 1px);
-  background-size: 22px 22px;
-}
-
-.gradient-orb {
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(90px);
-  opacity: 0.55;
-  pointer-events: none;
-  z-index: 0;
-}
-
 /* ---------- Form ---------- */
 
 .input-field {
@@ -130,6 +109,29 @@ body {
 
 .input-field-dark {
   @apply w-full rounded-2xl border border-white/15 bg-white/5 px-5 py-4 text-sm text-white placeholder:text-white/40 transition-all duration-200 focus:border-gold focus:outline-none focus:ring-4 focus:ring-gold/20;
+}
+
+/* ---------- Performance: skip offscreen rendering ---------- */
+/* Same content, just lets the browser skip layout/paint for below-fold
+   sections until scrolled near. Huge INP/LCP win on mobile. */
+#about,
+#why,
+#services,
+#process,
+#testimonials,
+#team,
+#contact {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
+/* Infinite ping animations run on the GPU forever (WhatsApp widget).
+   Keep the look on capable devices, kill it where it hurts most:
+   reduced-motion users + small screens. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-ping {
+    animation: none !important;
+  }
 }
 
 /* When the consent banner is visible, hide the WhatsApp widget on mobile to avoid overlap */

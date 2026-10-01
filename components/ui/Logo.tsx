@@ -1,22 +1,31 @@
+import Image from "next/image";
+
 type Props = {
   /** "onDark" wraps the logo in a cream pill so the colored mark stays readable on dark surfaces */
   variant?: "onLight" | "onDark";
   /** Pixel height of the logo image */
   height?: number;
   className?: string;
+  /** Set false for below-fold logos (footer/widget) so they don't compete with LCP */
+  priority?: boolean;
 };
 
-export function Logo({ variant = "onLight", height = 36, className = "" }: Props) {
-  // SVG (~2:1 aspect). Use plain <img> since next/image doesn't optimize SVGs anyway,
-  // and skipping it avoids the layout overhead of the optimization wrapper.
-  // eslint-disable-next-line @next/next/no-img-element
+export function Logo({ variant = "onLight", height = 36, className = "", priority = false }: Props) {
+  // Optimized WebP (~10KB, 480x240) rasterized from the original 548KB SVG wrapper.
+  // Same visuals, explicit dimensions prevent CLS.
+  const width = Math.round(height * 2);
   const img = (
-    <img
-      src="/amda_logo.svg"
+    <Image
+      src="/amda-logo.webp"
       alt="AMDA Global Solution"
+      width={width}
+      height={height}
       style={{ height, width: "auto" }}
       className="block select-none"
       draggable={false}
+      priority={priority}
+      loading={priority ? "eager" : "lazy"}
+      sizes={`${width}px`}
     />
   );
 
