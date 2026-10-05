@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Palette,
@@ -15,9 +16,11 @@ import {
   ClipboardCheck,
   Printer,
   ExternalLink,
+  Maximize2,
 } from "lucide-react";
 import { Reveal } from "./ui/Reveal";
 import { SectionTag } from "./ui/SectionTag";
+import { Lightbox } from "./ui/Lightbox";
 import { useSiteContent } from "@/lib/content-store";
 
 type Tab = "brand" | "protect" | "comply" | "print";
@@ -482,11 +485,22 @@ function ComplyPanel() {
 
 /* ---------- 04 Print & Publish (guide §2.04) ---------- */
 
+const PRINT_PROJECTS = [
+  { src: "/newprojects/print-multiply-book.webp", title: "MULTIPLY — Book design + bulk print" },
+  { src: "/newprojects/print-bazza-history.webp", title: "A History of Bazza — Book publishing" },
+  { src: "/newprojects/print-edge-exposure.webp", title: "Edge of Exposure — Design + print run" },
+  { src: "/newprojects/print-reason-great.webp", title: "A Reason To Be Great — Print delivery" },
+  { src: "/newprojects/print-toko-academy.webp", title: "Toko Academy KSCC 2026 — Booklet print" },
+  { src: "/newprojects/brand-naf-sunday-shirts.webp", title: "NAF Protestant Sunday School — Custom tees" },
+  { src: "/newprojects/brand-code103-shirts.webp", title: "CODE103 — Branded apparel" },
+];
+
 function PrintPanel() {
   const content = useSiteContent();
   const pp = content.printPublish;
+  const [lightbox, setLightbox] = useState<number | null>(null);
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-5xl">
       <p className="mx-auto max-w-2xl text-center text-base text-muted">{pp.summary}</p>
       <ul className="mt-12 grid gap-4 sm:grid-cols-2">
         {pp.items.map((item) => (
@@ -501,6 +515,49 @@ function PrintPanel() {
           </li>
         ))}
       </ul>
+
+      {/* Recent print & branding work — click any tile to view fullscreen */}
+      <div className="mt-12">
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.22em] text-gold-deep">
+          Recent work
+        </p>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {PRINT_PROJECTS.map((p, i) => (
+            <button
+              key={p.src}
+              type="button"
+              onClick={() => setLightbox(i)}
+              className="group relative overflow-hidden rounded-3xl border border-navy/10 bg-white text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-card"
+              aria-label={`View larger: ${p.title}`}
+            >
+              <Image
+                src={p.src}
+                alt={p.title}
+                width={800}
+                height={600}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="aspect-[4/3] w-full object-cover"
+                loading="lazy"
+              />
+              <span className="absolute inset-0 flex items-center justify-center gap-2 bg-navy/0 text-cream opacity-0 transition-all group-hover:bg-navy/45 group-hover:opacity-100">
+                <Maximize2 size={18} />
+                <span className="text-xs font-semibold">Click to view</span>
+              </span>
+              <span className="block px-4 py-3 text-xs font-semibold text-navy/80">{p.title}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {lightbox !== null && (
+        <Lightbox
+          items={PRINT_PROJECTS.map((p) => ({ src: p.src, alt: p.title, caption: p.title }))}
+          index={lightbox}
+          onClose={() => setLightbox(null)}
+          onNav={setLightbox}
+        />
+      )}
+
       <div className="mt-10 text-center">
         <a href="#contact" className="btn-primary">
           Discuss a print project
