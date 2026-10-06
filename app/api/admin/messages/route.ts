@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { checkSession } from "@/lib/admin-server";
+import { checkSession, clientIp } from "@/lib/admin-server";
+import { recordAudit } from "@/lib/audit-server";
 import type { ContactMessage } from "@/lib/messages";
 
 const DATA_DIR = process.env.ADMIN_DATA_DIR ?? path.join(process.cwd(), "data");
@@ -66,5 +67,6 @@ export async function DELETE(req: NextRequest) {
   }
   const messages = await readMessages();
   await writeMessages(messages.filter((m) => m.id !== id));
+  await recordAudit("message-deleted", clientIp(req), `id=${id}`);
   return NextResponse.json({ ok: true });
 }

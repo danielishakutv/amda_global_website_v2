@@ -25,6 +25,7 @@ import {
   Loader2,
   Menu,
   X,
+  ScrollText,
 } from "lucide-react";
 import { DEFAULT_CONTENT, type SiteContent, type TestimonialItem } from "@/lib/site-content";
 import {
@@ -40,9 +41,11 @@ import {
   apiLogout,
   apiMarkMessage,
   apiMe,
+  apiAuditLog,
   audit,
   readAudit,
   type InboxMessage,
+  type ServerAuditEvent,
 } from "@/lib/admin-auth";
 import { Logo } from "../ui/Logo";
 import { Field, TextInput, TextArea, Card, ImageField } from "./fields";
@@ -56,6 +59,7 @@ type Section =
   | "why"
   | "testimonials"
   | "founder"
+  | "activity"
   | "settings";
 
 const NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
@@ -67,6 +71,7 @@ const NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
   { id: "why", label: "Why choose us", icon: <Sparkles size={16} /> },
   { id: "testimonials", label: "Customer reviews", icon: <MessagesSquare size={16} /> },
   { id: "founder", label: "Founder & team", icon: <User size={16} /> },
+  { id: "activity", label: "Activity log", icon: <ScrollText size={16} /> },
   { id: "settings", label: "Settings", icon: <Settings2 size={16} /> },
 ];
 
@@ -340,6 +345,7 @@ export function AdminApp() {
             {section === "why" && <WhyEditor draft={draft} set={set} />}
             {section === "testimonials" && <TestimonialsEditor draft={draft} set={set} />}
             {section === "founder" && <FounderEditor draft={draft} set={set} />}
+            {section === "activity" && <ActivityLog />}
             {section === "settings" && (
               <SettingsEditor
                 draft={draft}
@@ -691,6 +697,87 @@ function MessagesEditor({ messages, onRefresh }: { messages: InboxMessage[]; onR
                     </div>
                   </div>
                 )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function ActivityLog() {
+  const [events, setEvents] = useState<ServerAuditEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    setLoading(true);
+    setEvents(await apiAuditLog());
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    void load();
+  }, []);
+
+  // event name -> friendly label + dot colour
+  const META: Record<string, { label: string; dot: string }> = {
+    "login-success": { label: "Signed in", dot: "bg-emerald-500" },
+    "login-failed": { label: "Failed sign-in", dot: "bg-red-500" },
+    "login-locked": { label: "Locked out (too many tries)", dot: "bg-red-600" },
+    "login-blocked": { label: "Blocked while locked out", dot: "bg-amber-500" },
+    logout: { label: "Signed out", dot: "bg-navy/40" },
+    "password-changed": { label: "Password changed", dot: "bg-amber-500" },
+    "image-upload": { label: "Image uploaded", dot: "bg-gold" },
+    "message-deleted": { label: "Message deleted", dot: "bg-red-500" },
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted">
+          {loading
+            ? "Loading…"
+            : events.length === 0
+              ? "No activity recorded yet."
+              : `${events.length} event${events.length === 1 ? "" : "s"} on the server — newest first.`}
+        </p>
+        <button
+          type="button"
+          onClick={() => void load()}
+          disabled={loading}
+          className="rounded-full border border-navy/20 px-4 py-2 text-xs font-semibold text-navy transition-colors hover:bg-navy hover:text-cream disabled:opacity-60"
+        >
+          {loading ? "Working…" : "Refresh"}
+        </button>
+      </div>
+
+      {!loading && events.length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-navy/20 bg-white p-10 text-center">
+          <ScrollText size={28} className="mx-auto text-muted" />
+          <p className="mt-4 font-display text-lg font-semibold text-navy">Nothing logged yet</p>
+          <p className="mx-auto mt-1 max-w-sm text-sm text-muted">
+            Sign-ins, sign-outs, password changes, image uploads and message deletions are
+            recorded here with the time and IP address.
+          </p>
+        </div>
+      ) : (
+        <ul className="space-y-2">
+          {events.map((e, i) => {
+            const meta = META[e.event] ?? { label: e.event, dot: "bg-navy/40" };
+            return (
+              <li
+                key={`${e.ts}-${i}`}
+                className="flex items-start gap-3 rounded-2xl border border-navy/10 bg-white p-4"
+              >
+                <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${meta.dot}`} aria-hidden />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-navy">{meta.label}</p>
+                  {e.detail && <p className="mt-0.5 break-words text-xs text-muted">{e.detail}</p>}
+                  <p className="mt-1 font-mono text-[0.7rem] text-muted">
+                    {new Date(e.ts).toLocaleString()} · IP {e.ip}
+                  </p>
+                </div>
               </li>
             );
           })}

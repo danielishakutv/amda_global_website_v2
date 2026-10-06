@@ -2,7 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { randomBytes } from "node:crypto";
-import { checkSession } from "@/lib/admin-server";
+import { checkSession, clientIp } from "@/lib/admin-server";
+import { recordAudit } from "@/lib/audit-server";
 
 // sharp is a native addon — loaded lazily inside the handler (not at module
 // top level) so Next's build-time page-data workers never try to load it.
@@ -71,5 +72,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, reason: "write-failed" }, { status: 500 });
   }
 
+  await recordAudit("image-upload", clientIp(req), `${name} (${Math.round(out.length / 1024)}KB from ${file.type})`);
   return NextResponse.json({ ok: true, url: `/api/uploads/${name}` });
 }

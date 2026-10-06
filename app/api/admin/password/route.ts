@@ -2,9 +2,11 @@ import { NextResponse, type NextRequest } from "next/server";
 import { randomBytes, pbkdf2 as pbkdf2Cb } from "node:crypto";
 import {
   checkSession,
+  clientIp,
   saveCredentials,
   verifyPassword,
 } from "@/lib/admin-server";
+import { recordAudit } from "@/lib/audit-server";
 
 function hashNext(next: string, salt: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -37,5 +39,6 @@ export async function POST(req: NextRequest) {
   }
   const salt = randomBytes(16).toString("hex");
   await saveCredentials(salt, await hashNext(next, salt));
+  await recordAudit("password-changed", clientIp(req));
   return NextResponse.json({ ok: true });
 }

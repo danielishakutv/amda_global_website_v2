@@ -78,6 +78,19 @@ export async function apiChangePassword(
   }
 }
 
+export type ServerAuditEvent = { ts: string; event: string; ip: string; detail: string };
+
+export async function apiAuditLog(): Promise<ServerAuditEvent[]> {
+  try {
+    const res = await fetch("/api/admin/audit/", { cache: "no-store" });
+    if (!res.ok) return [];
+    const body = await readJson(res);
+    return Array.isArray(body.events) ? (body.events as ServerAuditEvent[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function apiUpload(
   file: File
 ): Promise<{ ok: boolean; url?: string; reason?: string }> {
