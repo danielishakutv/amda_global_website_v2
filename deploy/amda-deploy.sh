@@ -51,11 +51,16 @@ env_value() {
   printf '%s' "$v"
 }
 
+# Where the machine's Telegram credential lives. NOT the app's .env: this box
+# alerts about every site on it, so a credential owned by one tenant would go
+# with that tenant the day it is decommissioned.
+TELEGRAM_CONF=${TELEGRAM_CONF:-/etc/toko-telegram.conf}
+
 notify() {
   local text=$1 token chat code
-  token=$(env_value TELEGRAM_BOT_TOKEN "$APP_DIR/.env")
-  chat=$(env_value TELEGRAM_ALERT_CHAT_ID "$APP_DIR/.env")
-  [ -n "$chat" ] || chat=$(env_value TELEGRAM_CHAT_ID "$APP_DIR/.env")
+  token=$(env_value TELEGRAM_BOT_TOKEN "$TELEGRAM_CONF")
+  chat=$(env_value TELEGRAM_ALERT_CHAT_ID "$TELEGRAM_CONF")
+  [ -n "$chat" ] || chat=$(env_value TELEGRAM_CHAT_ID "$TELEGRAM_CONF")
   if [ -z "$token" ] || [ -z "$chat" ]; then
     logger -t amda-deploy "telegram not configured; skipped: $(printf '%s' "$text" | head -1)"
     return 0
