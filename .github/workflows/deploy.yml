@@ -1,0 +1,68 @@
+# Production deploy for amdaglobal.com.
+#
+# Any push to main (from anyone with write access) deploys to the VPS. You can
+# also run it by hand from the Actions tab — "Run workflow" — so a deploy never
+# needs a particular laptop.
+#
+# How it is safe:
+#   - The SSH key in DEPLOY_SSH_KEY is pinned on the server to a FORCED
+#     COMMAND (/usr/local/sbin/amda-deploy.sh) with `restrict`. Even if this
+#     secret leaked, it cannot open a shell, forward a port or read a file —
+#     only trigger this one deploy.
+#   - The host key is pinned via DEPLOY_KNOWN_HOSTS, so the job will not talk
+#     to an impostor.
+#   - The server builds BEFORE it restarts, so a broken commit leaves the
+#     running site untouched. Telegram gets told either way.
+name: Deploy to production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# One deploy at a time. Queue rather than cancel: cancelling mid-deploy could
+# leave the box with dependencies installed for a commit it is not building.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Trigger deploy over SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DEPLOY_SSH_KEY:-}" ]; then
+            echo "::error::DEPLOY_SSH_KEY is not set on this repository."
+            exit 1
+          fi
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+          echo "Triggering deploy on $DEPLOY_HOST (forced command on the server)…"
+          # No command is sent on purpose: the server's authorized_keys decides
+          # what runs. -T because the key forbids a PTY.
+          ssh -T -i ~/.ssh/deploy_key \
+              -o IdentitiesOnly=yes \
+              -o BatchMode=yes \
+              -o UserKnownHostsFile=~/.ssh/known_hosts \
+              -o StrictHostKeyChecking=yes \
+              -o ConnectTimeout=20 \
+              "${DEPLOY_USER}@${DEPLOY_HOST}"
+
+      - name: Confirm the site is up from the public internet
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 https://amdaglobal.com/)
+          echo "https://amdaglobal.com/ -> $code"
+          test "$code" = "200"

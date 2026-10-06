@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { checkLock, clientIp, recordFailure } from "@/lib/admin-server";
 import { saveMessage } from "@/lib/contact-server";
 import { findCountry } from "@/lib/countries";
+import { notifyNewLead } from "@/lib/telegram";
 import type { ContactInput, ContactMessage } from "@/lib/messages";
 
 // Google Form passthrough — submissions keep flowing to the sheet exactly as
@@ -81,11 +82,31 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, reason: "save-failed" }, { status: 500 });
   }
 
-  // Google forward is best-effort: the inbox copy is already safe.
-  try {
-    await forwardToGoogle(msg);
-  } catch {
-    /* sheet sync failed — message is still in the dashboard */
+  // Both notifications are best-effort and run in PARALLEL: the message is
+  // already on disk, so neither may fail the request, and neither should make
+  // the visitor wait on the other's timeout.
+  //
+  // Not `.catch(() => {})`: a lead that never reached the group is something
+  // somebody needs to know, so each outcome is classified and logged.
+  const phoneE164 = normalizePhone(msg.phone, msg.countryIso);
+  const [sheet, telegram] = await Promise.allSettled([
+    forwardToGoogle(msg),
+    notifyNewLead(msg, phoneE164),
+  ]);
+
+  if (sheet.status === "rejected") {
+    console.error(
+      `[contact] Google Form forward failed for ${msg.id}: ${
+        sheet.reason instanceof Error ? sheet.reason.message : String(sheet.reason)
+      } — message is still in the dashboard inbox`,
+    );
+  }
+  if (telegram.status === "fulfilled" && !telegram.value.ok) {
+    console.error(
+      `[contact] Telegram notify failed for ${msg.id}: ${telegram.value.reason} — ${telegram.value.detail}`,
+    );
+  } else if (telegram.status === "rejected") {
+    console.error(`[contact] Telegram notify threw for ${msg.id}: ${String(telegram.reason)}`);
   }
 
   return NextResponse.json({ ok: true });
