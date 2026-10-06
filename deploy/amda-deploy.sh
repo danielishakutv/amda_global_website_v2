@@ -29,7 +29,12 @@ LOG=/var/log/amda-deploy.log
 
 exec > >(tee -a "$LOG") 2>&1
 echo "=============================================================="
-echo "deploy started $(date -Is) by ${SSH_CONNECTION:+CI from ${SSH_CONNECTION%% *}}${SSH_CONNECTION:-hand}"
+if [ -n "${SSH_CONNECTION:-}" ]; then
+  TRIGGERED_BY="CI from ${SSH_CONNECTION%% *}"
+else
+  TRIGGERED_BY="hand"
+fi
+echo "deploy started $(date -Is) by ${TRIGGERED_BY}"
 
 # ------------------------------------------------------------------ telegram
 # Read one KEY=value from the app env. Deliberately not `source`: that would
