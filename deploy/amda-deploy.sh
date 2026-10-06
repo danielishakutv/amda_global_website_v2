@@ -135,11 +135,28 @@ if [ "$OLD_SHA" = "$NEW_SHA" ]; then
   echo "already at ${NEW_SHA}; rebuilding anyway (forced run)"
 fi
 
-DIRTY=$(git status --porcelain)
+# Tracked changes only.
+#
+# `--untracked-files=no` on purpose: a stray untracked file - an .env backup
+# taken by hand, a log - cannot be destroyed by a fast-forward, so refusing on
+# one is a deploy that fails for a reason that does not matter. The case that
+# DOES matter, an untracked file the incoming commit wants to create, is caught
+# by git itself when the merge runs, with a far better message than this check
+# could write. What must never be silently overwritten is somebody's edit to a
+# tracked file, which is exactly what this still refuses.
+DIRTY=$(git status --porcelain --untracked-files=no)
 if [ -n "$DIRTY" ]; then
-  fail "working tree at $APP_DIR has local changes, refusing to overwrite:
+  fail "working tree at $APP_DIR has local changes to tracked files, refusing to overwrite:
 $(printf '%s' "$DIRTY" | head -10)
 Resolve on the box, then re-run."
+fi
+
+# Noted, never fatal: useful when wondering what is lying about on the box.
+UNTRACKED=$(git status --porcelain --untracked-files=all | grep '^??' || true)
+if [ -n "$UNTRACKED" ]; then
+  echo "note: untracked files present (ignored by this deploy):"
+  printf '%s
+' "$UNTRACKED" | head -5
 fi
 
 git -c core.hooksPath=/dev/null merge --ff-only --quiet "origin/${BRANCH}" || fail "cannot fast-forward to origin/${BRANCH} (diverged history)"

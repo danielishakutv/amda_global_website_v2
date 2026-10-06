@@ -9,3 +9,6 @@ data
 *.log
 .vercel
 tsconfig.tsbuildinfo
+
+# Hand-taken env backups must not dirty the deploy tree.
+.env.bak*
