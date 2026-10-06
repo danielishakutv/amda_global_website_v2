@@ -42,32 +42,37 @@ export function Hero() {
     >
       {/* Background: photo + layered legibility gradients + glow. No text lag. */}
       {hero.backgroundImage ? (
-        <>
-          <Image
-            src={hero.backgroundImage}
-            alt=""
-            aria-hidden
-            fill
-            priority
-            sizes="100vw"
-            className="absolute inset-0 -z-10 h-full w-full object-cover object-center"
-          />
-          <div
-            aria-hidden
-            className="absolute inset-0 -z-10 bg-gradient-to-b from-navy-deep/90 via-navy-deep/70 to-navy-deep/95"
-          />
-          <div
-            aria-hidden
-            className="absolute inset-0 -z-10 bg-[radial-gradient(70%_55%_at_50%_0%,rgba(27,125,194,0.35)_0%,transparent_70%)]"
-          />
-          <div aria-hidden className="absolute inset-0 -z-10 bg-grid-dark opacity-60 [background-size:44px_44px]" />
-        </>
-      ) : (
-        <div
+        <Image
+          src={hero.backgroundImage}
+          alt=""
           aria-hidden
-          className="absolute inset-0 -z-10 bg-[radial-gradient(70%_55%_at_50%_0%,rgba(27,125,194,0.35)_0%,transparent_70%),linear-gradient(180deg,#04162A_0%,#082038_100%)]"
+          fill
+          priority
+          sizes="100vw"
+          className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
         />
-      )}
+      ) : null}
+
+      {/* Legibility + depth. A directional wash (brighter top-left, deep
+          bottom) anchors the copy, a fine grid adds texture, and a soft
+          brand-blue orb drifts behind the headline for a premium feel. */}
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 bg-[linear-gradient(115deg,rgba(4,22,42,0.92)_0%,rgba(4,22,42,0.72)_42%,rgba(4,22,42,0.9)_100%)]"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 bg-gradient-to-b from-navy-deep/40 via-transparent to-navy-deep"
+      />
+      <div aria-hidden className="absolute inset-0 -z-10 bg-grid-dark opacity-40 [background-size:40px_40px]" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-24 top-10 -z-10 h-[32rem] w-[32rem] rounded-full bg-gold/20 blur-[120px] motion-safe:animate-float-slow"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute right-0 top-1/3 -z-10 h-80 w-80 rounded-full bg-gold-soft/10 blur-[110px]"
+      />
 
       <div className="container relative flex min-h-[92svh] flex-col justify-center pb-14 pt-28 sm:pb-20 sm:pt-36 lg:pt-40">
         <div className="hero-copy min-w-0 max-w-3xl">
@@ -84,10 +89,16 @@ export function Hero() {
 
           <motion.h1
             {...rise(0.08)}
-            className="mt-5 text-balance break-words font-display text-display-xl font-medium leading-[1.04] tracking-tight"
+            className="mt-6 text-balance break-words font-display text-[clamp(2.5rem,6vw,4.25rem)] font-medium leading-[1.02] tracking-[-0.02em]"
           >
             {hero.titleA}{" "}
-            <span className="italic text-gold">{hero.titleAccent1}</span>{" "}
+            <span className="relative italic text-gold">
+              {hero.titleAccent1}
+              <span
+                aria-hidden
+                className="absolute inset-x-0 -bottom-1 h-px bg-gradient-to-r from-gold/0 via-gold/70 to-gold/0"
+              />
+            </span>{" "}
             {hero.titleB}{" "}
             <span className="italic text-gold">{hero.titleAccent2}</span>{" "}
             {hero.titleC}
@@ -140,33 +151,39 @@ export function Hero() {
         </div>
 
         {/* Focus areas — 2-col pills on mobile, row on desktop */}
-        <motion.div {...rise(0.4)} className="mt-10 border-t border-white/15 pt-6 sm:pt-7">
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-white/50 sm:text-xs">
+        <motion.div {...rise(0.4)} className="mt-10 pt-7">
+          <div aria-hidden className="h-px w-full bg-gradient-to-r from-white/0 via-white/20 to-white/0" />
+          <p className="mt-6 text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-white/50 sm:text-xs">
             What we do
           </p>
           <ul className="mt-4 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-2.5">
             {FOCUS.map((f) => (
               <li
                 key={f}
-                className="inline-flex min-w-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-2 text-[0.72rem] font-medium text-white/85 backdrop-blur transition-colors hover:border-gold/50 sm:px-4 sm:text-sm"
+                className="group inline-flex min-w-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-2 text-[0.72rem] font-medium text-white/85 backdrop-blur transition-colors duration-300 hover:border-gold/50 hover:bg-white/[0.1] sm:px-4 sm:text-sm"
               >
-                <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />
+                <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-gold transition-transform duration-300 group-hover:scale-125" />
                 <span className="truncate">{f}</span>
               </li>
             ))}
           </ul>
         </motion.div>
 
-        {/* Stats — glass cards, never squeeze */}
+        {/* Stats — glass cards with a gold top accent, never squeeze */}
         <motion.div
           {...rise(0.48)}
-          className="mt-6 grid grid-cols-3 gap-2.5 border-t border-white/15 pt-6 sm:mt-8 sm:gap-4 sm:pt-8"
+          className="mt-8 grid grid-cols-3 gap-2.5 pt-8 sm:gap-4"
         >
+          <div aria-hidden className="col-span-3 mb-1 h-px w-full bg-gradient-to-r from-white/0 via-white/20 to-white/0 sm:mb-2" />
           {STATS.map((stat) => (
             <div
               key={stat.label}
-              className="min-w-0 rounded-2xl border border-white/10 bg-white/[0.05] p-3 backdrop-blur sm:p-5"
+              className="group relative min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.08] to-white/[0.02] p-3 backdrop-blur transition-colors duration-300 hover:border-gold/40 sm:p-5"
             >
+              <span
+                aria-hidden
+                className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-gold/0 via-gold/60 to-gold/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              />
               <AnimatedCounter
                 value={stat.value}
                 className="block truncate font-display text-xl font-semibold tracking-tight text-white sm:text-3xl lg:text-4xl"

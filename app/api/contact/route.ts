@@ -64,6 +64,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, reason: "bad-request" }, { status: 400 });
   }
 
+  // Length caps: reject oversized fields so a single request can't bloat the
+  // message store or forward a huge payload to Google. Checked before trim so
+  // the raw wire size is bounded too.
+  const LIMITS = { name: 120, email: 254, phone: 32, countryIso: 8, service: 120, description: 4000 } as const;
+  const tooLong = (Object.keys(LIMITS) as (keyof typeof LIMITS)[]).some(
+    (k) => typeof input[k] === "string" && (input[k] as string).length > LIMITS[k]
+  );
+  if (tooLong) {
+    return NextResponse.json({ ok: false, reason: "too-long" }, { status: 400 });
+  }
+
   const errors: string[] = [];
   if (!input.name?.trim()) errors.push("name");
   if (!input.email?.trim() || !/^\S+@\S+\.\S+$/.test(input.email)) errors.push("email");

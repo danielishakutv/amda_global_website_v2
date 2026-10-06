@@ -78,6 +78,21 @@ export async function apiChangePassword(
   }
 }
 
+export async function apiUpload(
+  file: File
+): Promise<{ ok: boolean; url?: string; reason?: string }> {
+  try {
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/admin/upload/", { method: "POST", body: fd });
+    const body = await readJson(res);
+    if (res.ok && typeof body.url === "string") return { ok: true, url: body.url };
+    return { ok: false, reason: typeof body.reason === "string" ? body.reason : "error" };
+  } catch {
+    return { ok: false, reason: "network" };
+  }
+}
+
 export function audit(event: string, detail = "") {
   try {
     const raw = window.localStorage.getItem("amda-admin-audit-v1");

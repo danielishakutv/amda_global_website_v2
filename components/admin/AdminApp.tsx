@@ -45,7 +45,7 @@ import {
   type InboxMessage,
 } from "@/lib/admin-auth";
 import { Logo } from "../ui/Logo";
-import { Field, TextInput, TextArea, Card } from "./fields";
+import { Field, TextInput, TextArea, Card, ImageField } from "./fields";
 
 type Section =
   | "overview"
@@ -565,7 +565,7 @@ function Overview({
             <h3 className="font-display text-lg font-semibold text-navy">How this works</h3>
             <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-navy/80">
               <li>Pick a section on the left, edit the boxes, press <strong>Save changes</strong> below.</li>
-              <li>To change a photo, paste its file name (e.g. <code className="font-mono">/founder.webp</code>).</li>
+              <li>To change a photo, click <strong>Upload image</strong> (or drag a file onto the preview) — no file names needed.</li>
               <li>Press <strong>Download backup</strong> in Settings before big changes.</li>
             </ul>
           </section>
@@ -706,9 +706,14 @@ function HeroEditor({ draft, set }: { draft: SiteContent; set: <K extends keyof 
   return (
     <div className="grid gap-6">
       <Card title="Top of the homepage" sub="The first thing visitors see. Change the words or the background photo.">
+        <ImageField
+          label="Background image"
+          hint="Upload or drag a photo here — empty = solid navy background."
+          value={h.backgroundImage}
+          onChange={(v) => edit("backgroundImage", v)}
+        />
         <div className="grid gap-5 sm:grid-cols-2">
           <Field label="Tag"><TextInput value={h.tag} onChange={(e) => edit("tag", e.target.value)} /></Field>
-          <Field label="Background image" hint='e.g. /hero-bg.webp — empty = solid navy'><TextInput value={h.backgroundImage} onChange={(e) => edit("backgroundImage", e.target.value)} /></Field>
           <Field label="Title part 1"><TextInput value={h.titleA} onChange={(e) => edit("titleA", e.target.value)} /></Field>
           <Field label="Accent 1"><TextInput value={h.titleAccent1} onChange={(e) => edit("titleAccent1", e.target.value)} /></Field>
           <Field label="Title part 2"><TextInput value={h.titleB} onChange={(e) => edit("titleB", e.target.value)} /></Field>
@@ -859,7 +864,13 @@ function TestimonialsEditor({ draft, set }: { draft: SiteContent; set: <K extend
                 Remove
               </button>
             </div>
-            <TextInput aria-label="Media path" placeholder="/Outreach2026/… or https://… (empty = placeholder)" value={t.media ?? ""} onChange={(e) => set("testimonials", draft.testimonials.map((x, j) => (j === i ? { ...x, media: e.target.value } : x)))} />
+            <ImageField
+              label="Media"
+              hint={t.kind === "video" || t.kind === "audio" ? "Paste the file path — large media isn't uploaded here." : "Upload an image or drag one in. Empty = placeholder box."}
+              media={t.kind === "video" ? "video" : t.kind === "audio" ? "audio" : "image"}
+              value={t.media ?? ""}
+              onChange={(v) => set("testimonials", draft.testimonials.map((x, j) => (j === i ? { ...x, media: v } : x)))}
+            />
             <TextArea aria-label="Quote" rows={2} placeholder="Written quote (optional for media items)" value={t.quote ?? ""} onChange={(e) => set("testimonials", draft.testimonials.map((x, j) => (j === i ? { ...x, quote: e.target.value } : x)))} />
           </div>
         ))}
@@ -879,10 +890,8 @@ function FounderEditor({ draft, set }: { draft: SiteContent; set: <K extends key
         <Field label="Title"><TextInput value={f.title} onChange={(e) => set("founder", { ...f, title: e.target.value })} /></Field>
       </div>
       <Field label="Bio"><TextArea rows={4} value={f.bio} onChange={(e) => set("founder", { ...f, bio: e.target.value })} /></Field>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Photo path" hint="e.g. /founder.webp"><TextInput value={f.photo} onChange={(e) => set("founder", { ...f, photo: e.target.value })} /></Field>
-        <Field label="LinkedIn URL"><TextInput value={f.linkedin} placeholder="https://linkedin.com/in/…" onChange={(e) => set("founder", { ...f, linkedin: e.target.value })} /></Field>
-      </div>
+      <ImageField label="Photo" hint="Upload a headshot or drag one in." value={f.photo} onChange={(v) => set("founder", { ...f, photo: v })} />
+      <Field label="LinkedIn URL"><TextInput value={f.linkedin} placeholder="https://linkedin.com/in/…" onChange={(e) => set("founder", { ...f, linkedin: e.target.value })} /></Field>
     </Card>
     <Card title={`Team members (${team.length})`} sub="Add people one by one with photo and job title. They appear in cards under the founder.">
       <button
@@ -901,7 +910,7 @@ function FounderEditor({ draft, set }: { draft: SiteContent; set: <K extends key
               Remove
             </button>
           </div>
-          <TextInput aria-label="Member photo path" placeholder="/team/member-photo.png (empty = initials)" value={m.photo} onChange={(e) => set("team", team.map((x, j) => (j === i ? { ...x, photo: e.target.value } : x)))} />
+          <ImageField label="Member photo" hint="Upload a headshot — empty = initials." value={m.photo} onChange={(v) => set("team", team.map((x, j) => (j === i ? { ...x, photo: v } : x)))} />
           <TextInput aria-label="Member LinkedIn URL" placeholder="https://linkedin.com/in/…" value={m.linkedin ?? ""} onChange={(e) => set("team", team.map((x, j) => (j === i ? { ...x, linkedin: e.target.value } : x)))} />
           <TextArea aria-label="Member bio" rows={2} placeholder="Short bio (optional)" value={m.bio ?? ""} onChange={(e) => set("team", team.map((x, j) => (j === i ? { ...x, bio: e.target.value } : x)))} />
         </div>
