@@ -34,11 +34,11 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
-        <About />
-        <WhyChoose />
         <Services />
+        <WhyChoose />
         <HowWeWork />
         <Testimonials />
+        <About />
         <Founder />
         <Contact />
       </main>
