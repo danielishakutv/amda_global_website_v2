@@ -19,7 +19,7 @@
 
 set -uo pipefail
 
-APP_DIR=${APP_DIR:-/home/amdaglobal/app}
+APP_DIR=${APP_DIR:-/opt/amdaglobal}
 PM2_NAME=${PM2_NAME:-amdaglobal}
 HEALTH_URL=${HEALTH_URL:-http://127.0.0.1:3006/}
 PUBLIC_URL=${PUBLIC_URL:-https://amdaglobal.com/}
@@ -84,17 +84,51 @@ The site is still serving the previous build."
   exit 1
 }
 
+# Root runs npm lifecycle scripts and the built app from APP_DIR. If any
+# directory on the way to it can be renamed by a non-root user, that user can
+# swap in their own package.json and get root on the next deploy.
+#
+# This script was FIRST written with the checkout at /home/amdaglobal/app,
+# whose parent is owned by the unprivileged vhost user - exactly that hole.
+# It is re-checked on every run so the mistake cannot quietly return.
+check_trust_path() {
+  local p=$APP_DIR bad="" owner mode
+  while :; do
+    # A path that cannot be stat'ed is not a path that has been checked.
+    # Breaking out here silently would report "trusted" for a directory that
+    # does not exist, which is the one answer this guard must never give.
+    if ! owner=$(stat -c %U "$p" 2>/dev/null); then
+      bad="${bad}  ${p} cannot be read, so it cannot be trusted
+"
+      break
+    fi
+    mode=$(stat -c %A "$p" 2>/dev/null)
+    if [ "$owner" != "root" ]; then
+      bad="${bad}  ${p} is owned by ${owner}, not root
+"
+    elif [ "${mode:5:1}" = "w" ] || [ "${mode:8:1}" = "w" ]; then
+      bad="${bad}  ${p} is group/other writable (${mode})
+"
+    fi
+    [ "$p" = "/" ] && break
+    p=$(dirname "$p")
+  done
+  [ -z "$bad" ] || fail "unsafe path to ${APP_DIR}: root would execute code from a directory a non-root user can replace.
+${bad}"
+}
+
 # -------------------------------------------------------------------- locked
 exec 9>"$LOCK" || fail "cannot open lock file $LOCK"
 flock -n 9 || { echo "another deploy is running; exiting"; exit 0; }
 
 cd "$APP_DIR" || fail "APP_DIR $APP_DIR does not exist"
 [ -d .git ] || fail "$APP_DIR is not a git checkout"
+check_trust_path
 
 OLD_SHA=$(git rev-parse --short HEAD)
 
 # --------------------------------------------------------------------- fetch
-git fetch --quiet --prune origin "$BRANCH" || fail "git fetch failed"
+git -c core.hooksPath=/dev/null fetch --quiet --prune origin "$BRANCH" || fail "git fetch failed"
 NEW_SHA=$(git rev-parse --short "origin/${BRANCH}")
 
 if [ "$OLD_SHA" = "$NEW_SHA" ]; then
@@ -108,7 +142,7 @@ $(printf '%s' "$DIRTY" | head -10)
 Resolve on the box, then re-run."
 fi
 
-git merge --ff-only --quiet "origin/${BRANCH}" || fail "cannot fast-forward to origin/${BRANCH} (diverged history)"
+git -c core.hooksPath=/dev/null merge --ff-only --quiet "origin/${BRANCH}" || fail "cannot fast-forward to origin/${BRANCH} (diverged history)"
 NEW_SHA=$(git rev-parse --short HEAD)
 SUBJECT=$(git log -1 --pretty='%s' | cut -c1-120)
 AUTHOR=$(git log -1 --pretty='%an')
