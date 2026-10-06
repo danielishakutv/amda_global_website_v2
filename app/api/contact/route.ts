@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { checkLock, clientIp, recordFailure } from "@/lib/admin-server";
 import { saveMessage } from "@/lib/contact-server";
 import { findCountry } from "@/lib/countries";
-import { notifyNewLead } from "@/lib/telegram";
+import { announceLead } from "@/lib/toko-leads";
 import type { ContactInput, ContactMessage } from "@/lib/messages";
 
 // Google Form passthrough — submissions keep flowing to the sheet exactly as
@@ -86,12 +86,24 @@ export async function POST(req: Request) {
   // already on disk, so neither may fail the request, and neither should make
   // the visitor wait on the other's timeout.
   //
-  // Not `.catch(() => {})`: a lead that never reached the group is something
+  // Not `.catch(() => {})`: a lead that never reached anybody is something
   // somebody needs to know, so each outcome is classified and logged.
+  //
+  // This site holds no bot token and no recipient list. It posts the lead to
+  // the Toko hub, which owns who hears about it for this project.
   const phoneE164 = normalizePhone(msg.phone, msg.countryIso);
   const [sheet, telegram] = await Promise.allSettled([
     forwardToGoogle(msg),
-    notifyNewLead(msg, phoneE164),
+    announceLead({
+      name: msg.name,
+      email: msg.email,
+      phone: msg.phone,
+      phoneE164,
+      service: msg.service,
+      message: msg.description,
+      source: "amdaglobal.com contact form",
+      actionUrl: "https://amdaglobal.com/admin/",
+    }),
   ]);
 
   if (sheet.status === "rejected") {
@@ -103,10 +115,10 @@ export async function POST(req: Request) {
   }
   if (telegram.status === "fulfilled" && !telegram.value.ok) {
     console.error(
-      `[contact] Telegram notify failed for ${msg.id}: ${telegram.value.reason} — ${telegram.value.detail}`,
+      `[contact] lead notification failed for ${msg.id}: ${telegram.value.reason} — ${telegram.value.detail}`,
     );
   } else if (telegram.status === "rejected") {
-    console.error(`[contact] Telegram notify threw for ${msg.id}: ${String(telegram.reason)}`);
+    console.error(`[contact] lead notification threw for ${msg.id}: ${String(telegram.reason)}`);
   }
 
   return NextResponse.json({ ok: true });
