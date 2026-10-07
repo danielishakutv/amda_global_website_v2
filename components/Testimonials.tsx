@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Play, Mic, ImageIcon, Quote, Truck, MessageSquareText, Maximize2 } from "lucide-react";
+import { Play, Mic, ImageIcon, Truck, MessageSquareText, Maximize2 } from "lucide-react";
 import { Reveal } from "./ui/Reveal";
 import { SectionTag } from "./ui/SectionTag";
 import { Lightbox } from "./ui/Lightbox";
 import { useSiteContent } from "@/lib/content-store";
 import type { TestimonialItem } from "@/lib/site-content";
-// Videos play directly inline (no preview facade, no modal) — fully responsive.
+// Videos play directly inline (no preview facade, no modal), fully responsive.
 
 type Filter = "all" | TestimonialItem["kind"];
 
@@ -37,7 +37,7 @@ export function Testimonials() {
       className="section bg-cream"
     >
       <div className="container relative min-w-0">
-        <div className="mx-auto max-w-3xl px-1 text-center">
+        <div className="max-w-3xl">
           <Reveal>
             <SectionTag>Client Results</SectionTag>
           </Reveal>
@@ -50,32 +50,26 @@ export function Testimonials() {
             </h2>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="mx-auto mt-5 max-w-2xl text-pretty text-base leading-relaxed text-muted sm:text-lg">
-              Screenshots, photos, videos and voice notes — one flexible wall that
+            <p className="mt-5 max-w-2xl text-pretty text-base leading-relaxed text-muted sm:text-lg">
+              Screenshots, photos, videos and voice notes: one flexible wall that
               grows as AMDA collects more client evidence.
             </p>
           </Reveal>
         </div>
 
-        {/* Client count — guide: do NOT invent; editable placeholder */}
-        <Reveal delay={0.12}>
-          <div className="mx-auto mt-10 max-w-xl text-center">
-            {content.clientCount ? (
-              <p className="inline-flex items-center gap-3 rounded-full border border-navy/10 bg-white px-6 py-3 text-sm font-semibold text-navy shadow-sm">
-                <span className="font-display text-2xl text-gold-deep">{content.clientCount}</span>
-                <span className="text-muted">clients &amp; brands served</span>
-              </p>
-            ) : (
-              <p className="inline-block rounded-full border border-dashed border-navy/25 bg-white/60 px-6 py-3 text-sm text-muted">
-                Client / brand count — to be announced (update in Admin → Testimonials)
-              </p>
-            )}
-          </div>
-        </Reveal>
+        {/* Client count: shown only once a real figure is set in admin (never invented) */}
+        {content.clientCount && (
+          <Reveal delay={0.12}>
+            <p className="mt-8 inline-flex items-center gap-3 rounded-full border border-navy/10 bg-white px-6 py-3 text-sm font-semibold text-navy shadow-sm">
+              <span className="font-display text-2xl text-gold-deep">{content.clientCount}</span>
+              <span className="text-muted">clients &amp; brands served</span>
+            </p>
+          </Reveal>
+        )}
 
-        {/* Filters — wraps to 2-3 rows on phones, scroll-safe */}
+        {/* Filters: wrap to 2-3 rows on phones */}
         <Reveal delay={0.15}>
-          <div className="mx-auto mt-8 flex max-w-full flex-wrap justify-center gap-2 px-1 sm:mt-10">
+          <div className="mt-8 flex max-w-full flex-wrap gap-2 sm:mt-10">
             {FILTERS.map((f) => (
               <button
                 key={f.id}
@@ -103,15 +97,8 @@ export function Testimonials() {
         </div>
 
         {items.length === 0 && (
-          <p className="mt-12 text-center text-sm text-muted">
-            Nothing in this category yet — add it in Admin → Testimonials.
-          </p>
+          <p className="mt-12 text-sm text-muted">Nothing in this category yet.</p>
         )}
-
-        <p className="mt-10 text-center text-xs text-muted">
-          Structure: Client → Testimonial → Photo / Video / Audio / Screenshot →
-          Project / Service. New formats slot in without a redesign.
-        </p>
       </div>
     </section>
   );
@@ -162,19 +149,9 @@ function toYouTubeEmbed(url: string) {
 }
 
 function VideoBlock({ item }: { item: TestimonialItem }) {
-  // Direct playback — no preview facade, no modal. Responsive 16:9 inline.
+  // Direct playback, no preview facade, no modal. Responsive 16:9 inline.
   const src = (item.media ?? "").trim();
-  if (!src) {
-    return (
-      <div className="flex aspect-video w-full flex-col items-center justify-center gap-2 bg-navy p-4 text-center sm:p-6">
-        <span className="grid h-11 w-11 place-items-center rounded-full bg-gold text-navy">
-          <Play size={18} />
-        </span>
-        <p className="text-xs font-semibold text-cream">Video testimonial — {item.client}</p>
-        <p className="text-[11px] text-cream/70">Upload MP4/WebM, set media path in Admin</p>
-      </div>
-    );
-  }
+  if (!src) return null;
   if (isYouTubeUrl(src)) {
     return (
       <div className="aspect-video w-full overflow-hidden bg-black">
@@ -213,11 +190,11 @@ function ZoomableImage({ item }: { item: TestimonialItem }) {
         type="button"
         onClick={() => setOpen(true)}
         className="group relative block w-full min-w-0 overflow-hidden bg-cream/60"
-        aria-label={`View larger: ${item.client} — ${item.project}`}
+        aria-label={`View larger: ${item.client}, ${item.project}`}
       >
         <Image
           src={src}
-          alt={`${item.client} — ${item.project}`}
+          alt={`${item.client}, ${item.project}`}
           width={800}
           height={600}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -234,8 +211,8 @@ function ZoomableImage({ item }: { item: TestimonialItem }) {
           items={[
             {
               src,
-              alt: `${item.client} — ${item.project}`,
-              caption: `${item.client} — ${item.project}`,
+              alt: `${item.client}, ${item.project}`,
+              caption: `${item.client}, ${item.project}`,
             },
           ]}
           index={0}
@@ -258,39 +235,28 @@ function TestimonialCard({ item }: { item: TestimonialItem }) {
         <span className="truncate">{kindLabel(item.kind)}</span>
       </div>
 
-      {/* Media slot — direct playback, responsive */}
-      <div className="mt-4 min-w-0 overflow-hidden rounded-xl border border-navy/10 bg-cream/60 sm:rounded-2xl">
-        {item.kind === "video" ? (
-          <VideoBlock item={item} />
-        ) : item.kind === "audio" ? (
-          <div className="flex min-w-0 flex-col gap-2 p-4">
-            <div className="flex min-w-0 items-center gap-2 text-xs font-semibold text-navy">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-navy text-gold">
-                <Mic size={14} />
-              </span>
-              <span className="truncate">{media ? `Voice note — ${item.client}` : "Voice-note testimonial — placeholder"}</span>
-            </div>
-            {media ? (
+      {/* Media slot: only rendered when there is media to show */}
+      {media && (
+        <div className="mt-4 min-w-0 overflow-hidden rounded-xl border border-navy/10 bg-cream/60 sm:rounded-2xl">
+          {item.kind === "video" ? (
+            <VideoBlock item={item} />
+          ) : item.kind === "audio" ? (
+            <div className="flex min-w-0 flex-col gap-2 p-4">
+              <div className="flex min-w-0 items-center gap-2 text-xs font-semibold text-navy">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-navy text-gold-soft">
+                  <Mic size={14} />
+                </span>
+                <span className="truncate">Voice note from {item.client}</span>
+              </div>
               <audio controls preload="none" className="w-full min-w-0" aria-label={`Voice note from ${item.client}`}>
                 <source src={media} />
               </audio>
-            ) : (
-              <>
-                <audio controls preload="none" className="w-full min-w-0" aria-label={`Voice note from ${item.client}`} />
-                <p className="text-[11px] text-muted">Upload MP3/M4A, set media path in Admin</p>
-              </>
-            )}
-          </div>
-        ) : media ? (
-          <ZoomableImage item={item} />
-        ) : (
-          <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 border border-dashed border-navy/20 p-4 text-center sm:p-6">
-            <Quote size={18} className="text-gold-deep" />
-            <p className="text-xs font-semibold text-navy">Media placeholder</p>
-            <p className="text-[11px] text-muted">Add a screenshot / photo in Admin</p>
-          </div>
-        )}
-      </div>
+            </div>
+          ) : (
+            <ZoomableImage item={item} />
+          )}
+        </div>
+      )}
 
       {item.quote && (
         <p className="mt-4 flex-1 text-pretty break-words text-sm leading-relaxed text-navy/85">“{item.quote}”</p>

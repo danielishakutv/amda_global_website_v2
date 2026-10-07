@@ -30,6 +30,7 @@ const config: Config = {
           soft: "rgb(var(--color-gold-soft) / <alpha-value>)",
           deep: "rgb(var(--color-gold-deep) / <alpha-value>)",
         },
+        paper: "rgb(var(--color-paper) / <alpha-value>)",
         cream: "rgb(var(--color-cream) / <alpha-value>)",
         sand: "rgb(var(--color-sand) / <alpha-value>)",
         ink: "rgb(var(--color-ink) / <alpha-value>)",
@@ -48,17 +49,17 @@ const config: Config = {
         "display-md": ["clamp(1.5rem, 3vw, 2.125rem)", { lineHeight: "1.15", letterSpacing: "-0.005em" }],
       },
       boxShadow: {
-        glow: "0 0 60px -10px rgba(27, 125, 194, 0.4)",
-        card: "0 30px 60px -30px rgba(8, 32, 56, 0.25)",
+        glow: "0 0 60px -10px rgba(11, 129, 191, 0.4)",
+        card: "0 30px 60px -30px rgba(29, 50, 67, 0.25)",
         ring: "0 0 0 1px rgba(255,255,255,0.06), 0 30px 60px -30px rgba(0,0,0,0.5)",
       },
       backgroundImage: {
         "grid-light":
-          "linear-gradient(rgba(8,32,56,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(8,32,56,0.06) 1px, transparent 1px)",
+          "linear-gradient(rgba(29,50,67,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(29,50,67,0.06) 1px, transparent 1px)",
         "grid-dark":
           "linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)",
         "radial-gold":
-          "radial-gradient(60% 60% at 50% 0%, rgba(27,125,194,0.22) 0%, transparent 70%)",
+          "radial-gradient(60% 60% at 50% 0%, rgba(11,129,191,0.22) 0%, transparent 70%)",
       },
       animation: {
         "fade-up": "fadeUp 0.7s ease-out both",

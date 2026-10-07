@@ -26,13 +26,19 @@ import {
   Menu,
   X,
   ScrollText,
+  CircleHelp,
 } from "lucide-react";
-import { DEFAULT_CONTENT, type SiteContent, type TestimonialItem } from "@/lib/site-content";
 import {
+  DEFAULT_CONTENT,
+  LEGACY_CONTENT_STORAGE_KEY,
+  type SiteContent,
+  type TestimonialItem,
+} from "@/lib/site-content";
+import {
+  fetchSiteContent,
   saveSiteContent,
   resetSiteContent,
   exportSiteContent,
-  contentLastUpdated,
 } from "@/lib/content-store";
 import {
   apiChangePassword,
@@ -57,6 +63,7 @@ type Section =
   | "story"
   | "services"
   | "why"
+  | "faq"
   | "testimonials"
   | "founder"
   | "activity"
@@ -69,21 +76,38 @@ const NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
   { id: "story", label: "About story", icon: <BookOpenText size={16} /> },
   { id: "services", label: "Services & prices", icon: <Briefcase size={16} /> },
   { id: "why", label: "Why choose us", icon: <Sparkles size={16} /> },
+  { id: "faq", label: "FAQ", icon: <CircleHelp size={16} /> },
   { id: "testimonials", label: "Customer reviews", icon: <MessagesSquare size={16} /> },
   { id: "founder", label: "Founder & team", icon: <User size={16} /> },
   { id: "activity", label: "Activity log", icon: <ScrollText size={16} /> },
   { id: "settings", label: "Settings", icon: <Settings2 size={16} /> },
 ];
 
-function loadDraft(): SiteContent {
-  if (typeof window === "undefined") return DEFAULT_CONTENT;
+// Before content moved to the server, Save only wrote to this browser's
+// localStorage — those edits never reached the live site. If any are still
+// here, the admin is offered to load them into the editor (not auto-published).
+function readLegacyDraft(): { content: SiteContent; updatedAt: string | null } | null {
   try {
-    const raw = window.localStorage.getItem("amda-content-v1");
-    if (!raw) return DEFAULT_CONTENT;
-    const parsed = JSON.parse(raw) as { content: SiteContent };
-    return { ...DEFAULT_CONTENT, ...parsed.content };
+    const raw = window.localStorage.getItem(LEGACY_CONTENT_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { content?: SiteContent; updatedAt?: string };
+    if (!parsed.content) return null;
+    return { content: { ...DEFAULT_CONTENT, ...parsed.content }, updatedAt: parsed.updatedAt ?? null };
   } catch {
-    return DEFAULT_CONTENT;
+    return null;
+  }
+}
+
+function saveErrorMessage(reason?: string): string {
+  switch (reason) {
+    case "unauthorized":
+      return "Your session expired — log in again, then press Save.";
+    case "too-large":
+      return "Too much content to save in one go. Shorten some text and try again.";
+    case "network":
+      return "Couldn't reach the server. Check your connection and try again.";
+    default:
+      return "Save failed — nothing was changed on the website. Please try again.";
   }
 }
 
@@ -99,6 +123,7 @@ export function AdminApp() {
   const [messages, setMessages] = useState<InboxMessage[]>([]);
   const [toast, setToast] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [legacy, setLegacy] = useState<{ content: SiteContent; updatedAt: string | null } | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showToast = (msg: string, ms = 2600) => {
@@ -120,8 +145,12 @@ export function AdminApp() {
       if (!live) return;
       if (ok) {
         setAuthed(true);
-        setDraft(loadDraft());
-        setSavedAt(contentLastUpdated());
+        void fetchSiteContent().then((res) => {
+          if (!live || !res) return;
+          setDraft(res.content);
+          setSavedAt(res.updatedAt);
+        });
+        setLegacy(readLegacyDraft());
         void fetchInbox();
       } else {
         router.replace("/admin/login");
@@ -149,28 +178,50 @@ export function AdminApp() {
   const handleSave = async () => {
     if (saving) return;
     setSaving(true);
-    // Brief beat so the spinner reads as real work, not a flicker.
-    await new Promise((r) => setTimeout(r, 450));
-    saveSiteContent(draft);
-    audit("content-save", `section=${section}`);
-    setSavedAt(new Date().toISOString());
-    setDirty(false);
+    const res = await saveSiteContent(draft);
     setSaving(false);
-    showToast("Saved — the site on this device is updated.");
+    if (!res.ok) {
+      showToast(saveErrorMessage(res.reason), 5000);
+      return;
+    }
+    audit("content-save", `section=${section}`);
+    setSavedAt(res.updatedAt ?? new Date().toISOString());
+    setDirty(false);
+    showToast("Saved — the change is live on the website now.");
   };
 
-  const handleReset = () => {
-    if (!confirm("Bring back the original texts? Your edits on this device will be cleared.")) return;
-    resetSiteContent();
+  const handleReset = async () => {
+    if (!confirm("Bring back the original texts? Every published edit on the live website will be removed.")) return;
+    const res = await resetSiteContent();
+    if (!res.ok) {
+      showToast(saveErrorMessage(res.reason), 5000);
+      return;
+    }
     setDraft(DEFAULT_CONTENT);
     audit("content-reset", "");
     setSavedAt(null);
     setDirty(false);
-    showToast("Original texts restored.");
+    showToast("Original texts restored on the website.");
+  };
+
+  const loadLegacy = () => {
+    if (!legacy) return;
+    setDraft(legacy.content);
+    setDirty(true);
+    showToast("Loaded your older edits — review them, then press Save to publish.", 5000);
+  };
+
+  const dismissLegacy = () => {
+    try {
+      window.localStorage.removeItem(LEGACY_CONTENT_STORAGE_KEY);
+    } catch {
+      /* ignore */
+    }
+    setLegacy(null);
   };
 
   const handleExport = () => {
-    const blob = new Blob([exportSiteContent()], { type: "application/json" });
+    const blob = new Blob([exportSiteContent(draft)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -187,12 +238,11 @@ export function AdminApp() {
       const parsed = JSON.parse(text) as { content?: SiteContent } & SiteContent;
       const content = (parsed as { content?: SiteContent }).content ?? (parsed as SiteContent);
       if (!content.hero || !content.packages) throw new Error("bad file");
-      saveSiteContent({ ...DEFAULT_CONTENT, ...content });
+      // Loaded into the editor only — publishing stays an explicit Save.
       setDraft({ ...DEFAULT_CONTENT, ...content });
       audit("content-import", f.name);
-      setSavedAt(new Date().toISOString());
-      setDirty(false);
-      showToast("Backup loaded.");
+      setDirty(true);
+      showToast("Backup loaded into the editor — press Save to publish it.", 5000);
     } catch {
       showToast("That file is not a valid backup.");
     }
@@ -273,7 +323,7 @@ export function AdminApp() {
                   {titles[section]}
                 </h1>
                 <p className="text-xs text-muted">
-                  {dirty ? "Unsaved changes" : savedAt ? `Saved ${new Date(savedAt).toLocaleString()}` : "Guide defaults active"}
+                  {dirty ? "Unsaved changes" : savedAt ? `Live since ${new Date(savedAt).toLocaleString()}` : "Showing the original texts"}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -317,6 +367,39 @@ export function AdminApp() {
           </header>
 
           <main className="space-y-6 px-4 py-8 sm:px-8">
+            {legacy && (
+              <div className="rounded-3xl border border-amber/60 bg-amber/10 p-5 text-sm text-navy">
+                <p className="font-semibold">
+                  Edits found that never reached the website
+                </p>
+                <p className="mt-1 text-navy/80">
+                  Earlier, Save only stored changes in this browser
+                  {legacy.updatedAt ? ` (last on ${new Date(legacy.updatedAt).toLocaleString()})` : ""}, so
+                  visitors never saw them. Saving now publishes to the live site. Load
+                  those older edits into the editor to review them?
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      loadLegacy();
+                      dismissLegacy();
+                    }}
+                    className="rounded-full bg-navy px-5 py-2.5 text-xs font-semibold text-cream hover:bg-navy-soft"
+                  >
+                    Load them into the editor
+                  </button>
+                  <button
+                    type="button"
+                    onClick={dismissLegacy}
+                    className="rounded-full border border-navy/20 px-5 py-2.5 text-xs font-semibold text-navy hover:bg-white"
+                  >
+                    Discard them
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="flex items-start gap-3 rounded-3xl border border-navy/15 bg-white p-5 text-sm text-navy">
               <ShieldAlert size={18} className="mt-0.5 shrink-0 text-gold-deep" />
               <p>
@@ -343,6 +426,7 @@ export function AdminApp() {
             {section === "story" && <StoryEditor draft={draft} set={set} />}
             {section === "services" && <ServicesEditor draft={draft} set={set} />}
             {section === "why" && <WhyEditor draft={draft} set={set} />}
+            {section === "faq" && <FaqEditor draft={draft} set={set} />}
             {section === "testimonials" && <TestimonialsEditor draft={draft} set={set} />}
             {section === "founder" && <FounderEditor draft={draft} set={set} />}
             {section === "activity" && <ActivityLog />}
@@ -730,6 +814,8 @@ function ActivityLog() {
     "password-changed": { label: "Password changed", dot: "bg-amber-500" },
     "image-upload": { label: "Image uploaded", dot: "bg-gold" },
     "message-deleted": { label: "Message deleted", dot: "bg-red-500" },
+    "content-published": { label: "Website content published", dot: "bg-gold" },
+    "content-reset": { label: "Website reset to original texts", dot: "bg-amber" },
   };
 
   return (
@@ -792,10 +878,10 @@ function HeroEditor({ draft, set }: { draft: SiteContent; set: <K extends keyof 
   const edit = (k: keyof SiteContent["hero"], v: string) => set("hero", { ...h, [k]: v });
   return (
     <div className="grid gap-6">
-      <Card title="Top of the homepage" sub="The first thing visitors see. Change the words or the background photo.">
+      <Card title="Top of the homepage" sub="The first thing visitors see. Change the words or the photo beside them.">
         <ImageField
-          label="Background image"
-          hint="Upload or drag a photo here — empty = solid navy background."
+          label="Hero photo"
+          hint="Shown on the right of the headline. Upload or drag a photo here — empty = the Trust / Authority / Creativity brand bars."
           value={h.backgroundImage}
           onChange={(v) => edit("backgroundImage", v)}
         />
@@ -830,6 +916,15 @@ function StoryEditor({ draft, set }: { draft: SiteContent; set: <K extends keyof
         <Field label="Vision"><TextInput value={draft.vision} onChange={(e) => set("vision", e.target.value)} /></Field>
         <Field label="Mission"><TextInput value={draft.mission} onChange={(e) => set("mission", e.target.value)} /></Field>
         <Field label="Core values (comma separated)"><TextInput value={draft.coreValues.join(", ")} onChange={(e) => set("coreValues", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} /></Field>
+      </Card>
+      <Card title="Who AMDA serves" sub="The client list shown right under the top of the homepage. One per line.">
+        <Field label="Audiences (one per line)">
+          <TextArea
+            rows={7}
+            value={(draft.whoWeServe ?? []).join("\n")}
+            onChange={(e) => set("whoWeServe", e.target.value.split("\n"))}
+          />
+        </Field>
       </Card>
     </div>
   );
@@ -911,6 +1006,50 @@ function WhyEditor({ draft, set }: { draft: SiteContent; set: <K extends keyof S
           ))}
         </div>
       </Card>
+    </Card>
+  );
+}
+
+function FaqEditor({ draft, set }: { draft: SiteContent; set: <K extends keyof SiteContent>(k: K, v: SiteContent[K]) => void }) {
+  const faqs = draft.faqs ?? [];
+  const update = (i: number, patch: Partial<SiteContent["faqs"][number]>) =>
+    set("faqs", faqs.map((f, j) => (j === i ? { ...f, ...patch } : f)));
+  const move = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= faqs.length) return;
+    const next = [...faqs];
+    [next[i], next[j]] = [next[j], next[i]];
+    set("faqs", next);
+  };
+  return (
+    <Card title={`Frequently asked questions (${faqs.length})`} sub="Shown above the contact form. Leave an empty line in an answer to start a new paragraph.">
+      {faqs.map((f, i) => (
+        <div key={i} className="space-y-3 rounded-2xl border border-navy/10 bg-cream/50 p-4">
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-mono text-xs text-gold-deep">Question {String(i + 1).padStart(2, "0")}</span>
+            <div className="flex gap-1.5">
+              <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="rounded-full border border-navy/20 px-3 py-1.5 text-xs font-semibold text-navy hover:bg-navy hover:text-cream disabled:opacity-30">
+                Up
+              </button>
+              <button type="button" onClick={() => move(i, 1)} disabled={i === faqs.length - 1} className="rounded-full border border-navy/20 px-3 py-1.5 text-xs font-semibold text-navy hover:bg-navy hover:text-cream disabled:opacity-30">
+                Down
+              </button>
+              <button type="button" onClick={() => set("faqs", faqs.filter((_, j) => j !== i))} className="rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50">
+                Remove
+              </button>
+            </div>
+          </div>
+          <TextInput aria-label="Question" value={f.q} onChange={(e) => update(i, { q: e.target.value })} />
+          <TextArea aria-label="Answer" rows={4} value={f.a} onChange={(e) => update(i, { a: e.target.value })} />
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => set("faqs", [...faqs, { q: "New question?", a: "" }])}
+        className="rounded-full border border-navy/20 px-5 py-2.5 text-sm font-semibold text-navy hover:bg-navy hover:text-cream"
+      >
+        + Add question
+      </button>
     </Card>
   );
 }
@@ -1069,6 +1208,20 @@ function SettingsEditor({
         <Field label="Business address"><TextArea rows={2} value={draft.address} onChange={(e) => set("address", e.target.value)} /></Field>
       </Card>
 
+      <Card title="Social media links" sub="The icons in the website footer. Paste the full profile link; an empty box hides that icon.">
+        <div className="grid gap-4 sm:grid-cols-2">
+          {(["linkedin", "instagram", "facebook", "tiktok"] as const).map((k) => (
+            <Field key={k} label={{ linkedin: "LinkedIn", instagram: "Instagram", facebook: "Facebook", tiktok: "TikTok" }[k]}>
+              <TextInput
+                value={draft.socials?.[k] ?? ""}
+                placeholder="https://…"
+                onChange={(e) => set("socials", { ...DEFAULT_CONTENT.socials, ...draft.socials, [k]: e.target.value })}
+              />
+            </Field>
+          ))}
+        </div>
+      </Card>
+
       <Card title="Change your password" sub="You'll be asked for the current one first.">
         <form onSubmit={changePw} className="grid gap-4 sm:grid-cols-2">
           <Field label="Current password"><TextInput type="password" autoComplete="current-password" value={pw0} onChange={(e) => setPw0(e.target.value)} /></Field>
@@ -1084,7 +1237,7 @@ function SettingsEditor({
         </form>
       </Card>
 
-      <Card title="Backup & restore" sub="Download a backup file of everything, or load one back. Reset brings back the original texts.">
+      <Card title="Backup & restore" sub="Download a backup file of everything, or load one back into the editor. Reset removes all published edits from the live site.">
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={onExport} className="rounded-full bg-navy px-5 py-2.5 text-sm font-semibold text-cream">Download backup</button>
           <button type="button" onClick={() => fileRef.current?.click()} className="rounded-full border border-navy/20 px-5 py-2.5 text-sm font-semibold">Load backup</button>

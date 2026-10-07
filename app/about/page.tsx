@@ -23,14 +23,14 @@ const WhatsAppWidget = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: "About Us — A Brand Strategy & Compliance Advisory Firm",
+  title: "About Us: A Brand Strategy & Compliance Advisory Firm",
   description:
     "Learn how AMDA Global Solution helps businesses across Nigeria and Africa build brands that are clear, credible, scalable, and legally protected. Our story, vision, mission, and core values.",
   alternates: { canonical: "/about" },
   openGraph: {
     title: "About AMDA Global Solution",
     description:
-      "Our story, vision, mission and values — a brand strategy and compliance advisory firm for Nigeria and Africa.",
+      "Our story, vision, mission and values of a brand strategy and compliance advisory firm for Nigeria and Africa.",
     url: "https://amdaglobal.com/about",
   },
 };
@@ -49,7 +49,7 @@ const EXPERTISE_AREAS = [
   {
     icon: ShieldCheck,
     title: "Brand Protection & Compliance",
-    body: "Trademark advisory, brand governance, and compliance workflows — delivered in collaboration with licensed legal practitioners.",
+    body: "Trademark advisory, brand governance, and compliance workflows, delivered in collaboration with licensed legal practitioners.",
   },
   {
     icon: Layers,
@@ -67,28 +67,28 @@ export default function AboutPage() {
         <section className="bg-navy-deep pb-24 pt-36 text-white sm:pt-44">
           <div className="container relative">
             <Reveal>
-              <div className="flex justify-center">
+              <div className="flex">
                 <SectionTag variant="dark">About AMDA Global Solution</SectionTag>
               </div>
             </Reveal>
 
             <Reveal delay={0.05}>
-              <h1 className="mx-auto mt-7 max-w-4xl text-center font-display text-display-xl font-medium leading-[1.02] tracking-tight">
+              <h1 className="mt-7 max-w-4xl font-display text-display-xl font-medium leading-[1.02] tracking-tight">
                 A firm built on{" "}
-                <span className="italic text-gold">strategy</span>, craft, and{" "}
-                <span className="italic text-gold">conviction</span>.
+                <span className="italic text-gold-soft">strategy</span>, craft, and{" "}
+                <span className="italic text-gold-soft">conviction</span>.
               </h1>
             </Reveal>
 
             <Reveal delay={0.1}>
-              <p className="mx-auto mt-7 max-w-2xl text-center text-base text-white/70 sm:text-lg">
+              <p className="mt-7 max-w-2xl text-base text-white/70 sm:text-lg">
                 We help startups, SMEs, personal brands, and growing organizations across Nigeria
                 and Africa build brands that are clear, credible, scalable, and legally protected.
               </p>
             </Reveal>
 
             <Reveal delay={0.2}>
-              <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+              <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
                 <a href="/#contact" className="btn-primary w-full sm:w-auto">
                   Work with us
                   <ArrowRight size={16} strokeWidth={2.5} />
@@ -107,13 +107,13 @@ export default function AboutPage() {
         {/* ---------- Vision + Mission (guide §5) ---------- */}
         <section className="section bg-navy text-white">
           <div className="container relative">
-            <div className="mx-auto max-w-3xl text-center">
+            <div className="max-w-3xl">
               <Reveal>
                 <SectionTag variant="dark">Our North Star</SectionTag>
               </Reveal>
               <Reveal delay={0.05}>
                 <h2 className="mt-6 font-display text-display-lg font-semibold leading-[1.04] tracking-tight">
-                  What we&apos;re <span className="italic text-gold">building toward</span>.
+                  What we&apos;re <span className="italic text-gold-soft">building toward</span>.
                 </h2>
               </Reveal>
             </div>
@@ -122,21 +122,21 @@ export default function AboutPage() {
               <Reveal delay={0.05}>
                 <article className="card-dark h-full p-9">
                   <div className="flex items-center gap-3">
-                    <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gold/15 text-gold">
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gold/15 text-gold-soft">
                       <Eye size={20} />
                     </span>
-                    <span className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">
+                    <span className="text-xs font-semibold uppercase tracking-[0.2em] text-gold-soft">
                       Our Vision
                     </span>
                   </div>
                   <p className="mt-7 font-display text-2xl leading-snug text-white sm:text-3xl">
                     To become the number one trusted{" "}
-                    <span className="italic text-gold">African brand partner</span>.
+                    <span className="italic text-gold-soft">African brand partner</span>.
                   </p>
                   <p className="mt-5 text-sm leading-relaxed text-white/65">
                     A future where African businesses are recognized for the same quality of brand
-                    thinking and brand protection as the most respected names anywhere in the world
-                    — and where AMDA is the partner they trust to get them there.
+                    thinking and brand protection as the most respected names anywhere in the world,
+                    and where AMDA is the partner they trust to get them there.
                   </p>
                 </article>
               </Reveal>
@@ -147,18 +147,18 @@ export default function AboutPage() {
                     <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gold text-white">
                       <Target size={20} />
                     </span>
-                    <span className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">
+                    <span className="text-xs font-semibold uppercase tracking-[0.2em] text-gold-soft">
                       Our Mission
                     </span>
                   </div>
                   <p className="mt-7 font-display text-2xl leading-snug text-white sm:text-3xl">
                     Help businesses build{" "}
-                    <span className="italic text-gold">intentional, sustainable, and protected</span>{" "}
+                    <span className="italic text-gold-soft">intentional, sustainable, and protected</span>{" "}
                     brands.
                   </p>
                   <p className="mt-5 text-sm leading-relaxed text-white/75">
                     Through strategy-led thinking, creative excellence, and compliance-aligned
-                    solutions — delivered with transparency, professionalism, and partnership at
+                    solutions, delivered with transparency, professionalism, and partnership at
                     every stage of the relationship.
                   </p>
                 </article>
@@ -176,19 +176,19 @@ export default function AboutPage() {
         {/* ---------- Our Team ---------- */}
         <section className="section bg-navy-deep text-white">
           <div className="container relative">
-            <div className="mx-auto max-w-3xl text-center">
+            <div className="max-w-3xl">
               <Reveal>
                 <SectionTag variant="dark">Our Team</SectionTag>
               </Reveal>
               <Reveal delay={0.05}>
                 <h2 className="mt-6 font-display text-display-lg font-semibold leading-[1.04] tracking-tight">
-                  A team of <span className="italic text-gold">experts</span> working as one.
+                  A team of <span className="italic text-gold-soft">experts</span> working as one.
                 </h2>
               </Reveal>
               <Reveal delay={0.1}>
                 <p className="mt-5 text-base text-white/65 sm:text-lg">
                   AMDA is built and run by a team of experts across brand strategy, creative
-                  direction, content, and brand protection — alongside a network of licensed legal
+                  direction, content, and brand protection, alongside a network of licensed legal
                   professionals and industry specialists. We work as a single, accountable unit, not
                   a collection of freelancers.
                 </p>
@@ -200,7 +200,7 @@ export default function AboutPage() {
                 <Reveal key={area.title} delay={0.05 + i * 0.06}>
                   <article className="card-dark h-full">
                     <div className="flex items-center gap-4">
-                      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gold/15 text-gold">
+                      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gold/15 text-gold-soft">
                         <area.icon size={20} />
                       </span>
                       <h3 className="font-display text-xl font-semibold text-white">
@@ -221,7 +221,7 @@ export default function AboutPage() {
                   </span>
                   <p className="text-sm leading-relaxed text-white/80 sm:text-base">
                     Our partner-based model means you get a focused, senior team for every
-                    engagement — strategists, creatives, and compliance advisors who collaborate
+                    engagement: strategists, creatives, and compliance advisors who collaborate
                     directly with you and with each other. No layers, no hand-offs to junior
                     teams, no blurred ownership.
                   </p>
@@ -238,16 +238,16 @@ export default function AboutPage() {
               <div className="overflow-hidden rounded-[2rem] bg-navy p-10 text-cream shadow-card sm:p-16">
                 <div className="grid items-center gap-10 lg:grid-cols-12">
                   <div className="lg:col-span-7">
-                    <span className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">
+                    <span className="text-xs font-semibold uppercase tracking-[0.2em] text-gold-soft">
                       Ready When You Are
                     </span>
                     <h2 className="mt-4 font-display text-display-md font-semibold leading-[1.05] tracking-tight">
                       Let&apos;s build a brand that is clear, credible, scalable, and{" "}
-                      <span className="italic text-gold">protected</span>.
+                      <span className="italic text-gold-soft">protected</span>.
                     </h2>
                     <p className="mt-5 max-w-xl text-base text-white/70">
                       Tell us about your business and what you&apos;re trying to build. We&apos;ll
-                      come back with a clear path forward — no jargon, no inflated promises.
+                      come back with a clear path forward. No jargon, no inflated promises.
                     </p>
                   </div>
                   <div className="flex flex-col gap-3 sm:flex-row lg:col-span-5 lg:justify-end">

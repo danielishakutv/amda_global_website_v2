@@ -15,16 +15,16 @@ export function WhyChoose() {
       className="section bg-navy text-white"
     >
       <div className="container relative">
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="max-w-3xl">
           <Reveal>
-            <SectionTag variant="dark">Why Businesses Choose AMDA</SectionTag>
+            <SectionTag variant="dark">Key Differentiators</SectionTag>
           </Reveal>
           <Reveal delay={0.05}>
             <h2
               id="why-heading"
-              className="mt-6 font-display text-display-lg font-semibold leading-[1.04] tracking-tight"
+              className="mt-6 font-display text-display-lg font-bold leading-[1.04] tracking-tight"
             >
-              Key <span className="italic text-gold">Differentiators</span>
+              Why Choose AMDA
             </h2>
           </Reveal>
           <Reveal delay={0.1}>
@@ -39,7 +39,7 @@ export function WhyChoose() {
             <Reveal key={pillar.title} as="li" delay={0.05 + (i % 3) * 0.07}>
               <article className="card-dark group h-full">
                 <div className="flex items-center justify-between">
-                  <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gold/15 font-display text-base font-semibold text-gold transition-all duration-300 group-hover:bg-gold group-hover:text-white">
+                  <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gold/15 font-display text-base font-semibold text-gold-soft transition-all duration-300 group-hover:bg-gold group-hover:text-white">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <span className="font-mono text-xs text-white/30">
@@ -54,7 +54,7 @@ export function WhyChoose() {
         </ul>
 
         <Reveal delay={0.1}>
-          <div className="mt-16 flex justify-center">
+          <div className="mt-16 flex">
             <a href="#services" className="btn-ghost-dark">
               Explore Our Services
               <ArrowRight size={16} strokeWidth={2.5} />

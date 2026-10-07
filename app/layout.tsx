@@ -3,6 +3,7 @@ import { Source_Serif_4, Inter, JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { ContentProvider } from "@/lib/content-store";
+import { readSiteContent } from "@/lib/content-server";
 import "./globals.css";
 
 const ConsentBanner = dynamic(
@@ -34,7 +35,7 @@ const mono = JetBrains_Mono({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#0a1628",
+  themeColor: "#FBFCFC",
   width: "device-width",
   initialScale: 1,
 };
@@ -43,7 +44,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://amdaglobal.com"),
   alternates: { canonical: "/" },
   title: {
-    default: "AMDA Global Solution — Building Scalable and Protected Brands",
+    default: "AMDA Global Solution | Building Scalable and Protected Brands",
     template: "%s | AMDA Global Solution",
   },
   description:
@@ -62,7 +63,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_NG",
     url: "https://amdaglobal.com",
-    title: "AMDA Global Solution — Building Scalable and Protected Brands",
+    title: "AMDA Global Solution | Building Scalable and Protected Brands",
     description:
       "Brand strategy, experience, and compliance advisory for businesses across Nigeria and Africa.",
     siteName: "AMDA Global Solution",
@@ -84,13 +85,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Published admin content, read per request so edits are live immediately.
+  const { content } = await readSiteContent();
   return (
     <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
       <head>
-        {/* Perf-only resource hints — no visual change.
-            next/image (priority) already preloads the hero file itself. */}
-        <link rel="preload" as="image" href="/amda-logo.webp" type="image/webp" />
+        {/* Perf-only resource hints — no visual change. next/image (priority)
+            already preloads the header logo and hero photo. */}
         <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://docs.google.com" />
@@ -115,12 +117,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 addressRegion: "Nasarawa State",
                 addressCountry: "NG",
               },
-              sameAs: ["https://www.linkedin.com/in/jessehosea/"],
+              sameAs: Object.values(content.socials ?? {}).filter(Boolean),
               areaServed: ["Nigeria", "Africa"],
             }),
           }}
         />
-        <ContentProvider>{children}</ContentProvider>
+        <ContentProvider initial={content}>{children}</ContentProvider>
         <ConsentBanner />
 
         {/* Consent Mode v2 — defaults must run BEFORE gtag.js loads.

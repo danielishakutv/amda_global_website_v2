@@ -9,10 +9,7 @@ export function SectionTag({ children, variant = "light", className = "" }: Prop
     <span
       className={`section-tag ${variant === "dark" ? "section-tag-dark" : "section-tag-light"} ${className}`}
     >
-      <span
-        aria-hidden
-        className={`h-1.5 w-1.5 rounded-full ${variant === "dark" ? "bg-gold" : "bg-navy"}`}
-      />
+      <span aria-hidden className="h-1.5 w-1.5 bg-amber" />
       {children}
     </span>
   );

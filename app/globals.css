@@ -3,32 +3,33 @@
 @tailwind utilities;
 
 :root {
-  /* AMDA brand palette — derived from logo.
-     RGB triplets so Tailwind's opacity modifiers (e.g. bg-navy/15) compose correctly. */
+  /* AMDA brand palette — from the official brand board:
+       Trust #0B81BF · Authority #1D3243 · Creativity #E9AF20
+     RGB triplets so Tailwind's opacity modifiers (e.g. bg-navy/15) compose correctly.
+     Token names are historical: "gold" is the brand BLUE, "amber" the brand YELLOW. */
 
-  /* Dark surfaces — deep AMDA-blue tinted (not generic navy) */
-  --color-navy: 8 32 56;          /* #082038 */
-  --color-navy-deep: 4 22 42;     /* #04162A */
-  --color-navy-soft: 16 50 84;    /* #103254 */
+  /* Authority — dark surfaces and headings */
+  --color-navy: 29 50 67;         /* #1D3243 brand */
+  --color-navy-deep: 21 37 50;    /* #152532 shade, for depth (footer) */
+  --color-navy-soft: 41 66 86;    /* #294256 tint */
 
-  /* Primary brand accent — AMDA logo blue */
-  --color-gold: 27 125 194;       /* #1B7DC2 */
-  --color-gold-soft: 50 145 215;  /* #3291D7 */
-  --color-gold-deep: 17 96 158;   /* #11609E */
+  /* Trust — primary brand blue (fills, buttons, links on light) */
+  --color-gold: 11 129 191;       /* #0B81BF brand */
+  --color-gold-soft: 104 179 222; /* #68B3DE tint — blue TEXT on navy (5.7:1 contrast) */
+  --color-gold-deep: 8 101 150;   /* #086596 shade — hover, small blue text on light */
 
-  /* Light surfaces */
-  --color-cream: 245 245 240;
-  --color-sand: 236 233 223;
+  /* Light surfaces — cool off-whites, matching the brand board ground */
+  --color-paper: 251 252 252;     /* #FBFCFC header */
+  --color-cream: 245 247 248;     /* #F5F7F8 page */
+  --color-sand: 233 237 240;      /* #E9EDF0 */
 
   /* Text + neutral */
-  --color-ink: 8 32 56;
-  --color-muted: 92 110 140;
+  --color-ink: 29 50 67;
+  --color-muted: 84 101 117;      /* #546575 */
 
-  /* Secondary accents */
+  /* Creativity — brand yellow, used sparingly as a marker/accent */
+  --color-amber: 233 175 32;      /* #E9AF20 brand */
   --color-teal: 47 122 118;
-  --color-amber: 226 170 49;      /* #E2AA31 — small warm highlight (matches gold dot in logo) */
-
-  --shadow-glow: 0 0 80px -20px rgba(27, 125, 194, 0.5);
 }
 
 * {
@@ -50,7 +51,7 @@ body {
 
 ::selection {
   background-color: rgb(var(--color-gold));
-  color: rgb(var(--color-navy));
+  color: #fff;
 }
 
 /* ---------- Component utilities ---------- */
@@ -69,7 +70,7 @@ body {
   }
 
   .section-tag-dark {
-    @apply border-white/15 bg-white/5 text-gold;
+    @apply border-white/15 bg-white/5 text-gold-soft;
   }
 
   .display-heading {
@@ -77,7 +78,7 @@ body {
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-gold px-7 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-gold-soft hover:shadow-glow active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-gold px-7 py-3.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-gold-deep active:scale-[0.98];
   }
 
   .btn-secondary {
@@ -85,7 +86,7 @@ body {
   }
 
   .btn-ghost-dark {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-transparent px-7 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:border-gold hover:text-gold active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/30 bg-transparent px-7 py-3.5 text-sm font-semibold text-white transition-colors duration-200 hover:border-white hover:bg-white/10 active:scale-[0.98];
   }
 
   .card-light {
@@ -120,6 +121,7 @@ body {
 #process,
 #testimonials,
 #team,
+#faq,
 #contact {
   content-visibility: auto;
   contain-intrinsic-size: auto 900px;
@@ -139,14 +141,6 @@ body {
   body[data-consent-open="true"] .whatsapp-widget {
     display: none;
   }
-}
-
-/* Hero legibility: flat text-shadow so white copy reads over bright
-   photo areas. No overlay divs, no gradients — invisible by design. */
-.hero-copy {
-  text-shadow:
-    0 1px 2px rgba(4, 22, 42, 0.6),
-    0 2px 18px rgba(4, 22, 42, 0.45);
 }
 
 /* Admin sidebar scroll: thin, quiet, on-theme — no chunky native bar */

@@ -98,7 +98,7 @@ export function Contact() {
     } catch (err) {
       setSubmitError(
         err instanceof Error && err.message === "too-many"
-          ? "You've sent several messages already — please wait a little while and try again."
+          ? "You've sent several messages already. Please wait a little while and try again."
           : "We couldn't send your message just now. Please try again, or email info@amdaglobal.com directly."
       );
     } finally {
@@ -113,7 +113,7 @@ export function Contact() {
       className="section bg-cream"
     >
       <div className="container relative">
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="max-w-3xl">
           <Reveal>
             <SectionTag>Get In Touch</SectionTag>
           </Reveal>

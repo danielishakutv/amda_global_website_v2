@@ -1,8 +1,12 @@
 import Image from "next/image";
 
 type Props = {
-  /** "onDark" wraps the logo in a cream pill so the colored mark stays readable on dark surfaces */
-  variant?: "onLight" | "onDark";
+  /**
+   * "onLight"  — padded mark, for light surfaces
+   * "onDark"   — padded mark in a cream pill so it stays readable on dark surfaces
+   * "wordmark" — tightly cropped mark (no padding), for the off-white header
+   */
+  variant?: "onLight" | "onDark" | "wordmark";
   /** Pixel height of the logo image */
   height?: number;
   className?: string;
@@ -10,13 +14,17 @@ type Props = {
   priority?: boolean;
 };
 
+// amda-logo-wide.webp is cropped from the 8334px master PNG (520x125).
+const WORDMARK_RATIO = 520 / 125;
+
 export function Logo({ variant = "onLight", height = 36, className = "", priority = false }: Props) {
+  const wordmark = variant === "wordmark";
   // Optimized WebP (~10KB, 480x240) rasterized from the original 548KB SVG wrapper.
   // Same visuals, explicit dimensions prevent CLS.
-  const width = Math.round(height * 2);
+  const width = Math.round(height * (wordmark ? WORDMARK_RATIO : 2));
   const img = (
     <Image
-      src="/amda-logo.webp"
+      src={wordmark ? "/amda-logo-wide.webp" : "/amda-logo.webp"}
       alt="AMDA Global Solution"
       width={width}
       height={height}

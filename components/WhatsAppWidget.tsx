@@ -84,7 +84,7 @@ export function WhatsAppWidget() {
                   👋 Hi there! How can we help you build your brand today?
                 </p>
                 <p className="mt-2 text-[0.7rem] font-medium uppercase tracking-[0.18em] text-muted">
-                  — AMDA Team
+                  AMDA Team
                 </p>
               </div>
             </div>

@@ -34,7 +34,7 @@ export function StoryBlock() {
             <Reveal delay={0.3}>
               <ul className="mt-8 space-y-3">
                 {[
-                  "Transparent scope, timelines, and pricing — always.",
+                  "Transparent scope, timelines, and pricing. Always.",
                   "Clear ownership of every deliverable, with no hand-off gaps.",
                   "Compliance and legal soundness built into every brand we build.",
                   "Documentation and governance that outlive the engagement.",
@@ -62,7 +62,7 @@ export function ValuesBlock() {
   return (
     <section className="section relative overflow-hidden bg-cream">
       <div className="container relative">
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="max-w-3xl">
           <Reveal>
             <SectionTag>Core Beliefs &amp; Values</SectionTag>
           </Reveal>
@@ -74,17 +74,17 @@ export function ValuesBlock() {
           </Reveal>
           <Reveal delay={0.1}>
             <p className="mt-5 text-base text-muted sm:text-lg">
-              Three standards we use to make decisions — about who we work with,
+              Three standards we use to make decisions about who we work with,
               how we deliver, and what we refuse to compromise on.
             </p>
           </Reveal>
         </div>
 
-        <ul className="mx-auto mt-16 grid max-w-4xl gap-5 sm:grid-cols-3 lg:gap-6">
+        <ul className="mt-16 grid gap-5 sm:grid-cols-3 lg:gap-6">
           {values.map((v, i) => (
             <Reveal key={v} as="li" delay={0.05 + i * 0.07}>
-              <article className="card-light group h-full text-center">
-                <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-navy font-display text-lg font-semibold text-gold transition-colors group-hover:bg-gold group-hover:text-white">
+              <article className="card-light group h-full">
+                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-navy font-display text-lg font-semibold text-gold transition-colors group-hover:bg-gold group-hover:text-white">
                   {v.charAt(0)}
                 </span>
                 <h3 className="mt-6 font-display text-xl font-semibold text-navy">{v}</h3>

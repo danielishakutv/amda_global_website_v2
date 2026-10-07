@@ -34,7 +34,7 @@ const STEPS = [
   {
     icon: Rocket,
     title: "Implementation & Launch",
-    body: "We help implement your brand across all touchpoints—digital, print, and physical—ensuring consistency and impact.",
+    body: "We help implement your brand across digital, print, and physical touchpoints, ensuring consistency and impact.",
   },
   {
     icon: RefreshCcw,
@@ -58,7 +58,9 @@ export function HowWeWork() {
       className="section bg-navy-deep text-white"
     >
       <div className="container relative">
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="grid gap-12 lg:grid-cols-12 lg:gap-14">
+        {/* Heading stays in view while the steps scroll past (desktop) */}
+        <div className="lg:col-span-4 lg:sticky lg:top-28 lg:self-start">
           <Reveal>
             <SectionTag variant="dark">Our Process</SectionTag>
           </Reveal>
@@ -67,7 +69,7 @@ export function HowWeWork() {
               id="process-heading"
               className="mt-6 font-display text-display-lg font-semibold leading-[1.04] tracking-tight"
             >
-              How We <span className="italic text-gold">Work</span>
+              How We <span className="italic text-gold-soft">Work</span>
             </h2>
           </Reveal>
           <Reveal delay={0.1}>
@@ -78,7 +80,7 @@ export function HowWeWork() {
         </div>
 
         {/* Timeline */}
-        <ol className="relative mx-auto mt-16 max-w-4xl">
+        <ol className="relative lg:col-span-8">
           {/* vertical rail */}
           <span
             aria-hidden
@@ -90,7 +92,7 @@ export function HowWeWork() {
               <div className="absolute left-0 top-0 hidden sm:block">
                 <span className="relative grid h-12 w-12 place-items-center rounded-full bg-navy ring-4 ring-navy-deep">
                   <span className="absolute inset-0 rounded-full bg-gold/15" />
-                  <span className="relative font-mono text-sm font-bold text-gold">
+                  <span className="relative font-mono text-sm font-bold text-gold-soft">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                 </span>
@@ -98,15 +100,15 @@ export function HowWeWork() {
 
               <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-md sm:p-7">
                 <div className="flex items-center gap-3">
-                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-gold/15 text-gold sm:hidden">
+                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-gold/15 text-gold-soft sm:hidden">
                     <step.icon size={18} />
                   </span>
-                  <span className="font-mono text-xs text-gold sm:hidden">
+                  <span className="font-mono text-xs text-gold-soft sm:hidden">
                     Step {String(i + 1).padStart(2, "0")}
                   </span>
                 </div>
                 <div className="flex items-start gap-4">
-                  <span className="hidden h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gold/15 text-gold sm:grid">
+                  <span className="hidden h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gold/15 text-gold-soft sm:grid">
                     <step.icon size={20} />
                   </span>
                   <div>
@@ -120,19 +122,20 @@ export function HowWeWork() {
             </Reveal>
           ))}
         </ol>
+        </div>
 
         {/* Operating Model */}
         <div className="mt-16">
           <Reveal>
-            <h3 className="text-center text-xs font-semibold uppercase tracking-[0.22em] text-gold">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.22em] text-gold-soft">
               Operating Model
             </h3>
           </Reveal>
           <div className="mt-8 grid gap-5 md:grid-cols-3 lg:gap-6">
             {OPERATING_MODEL.map((item, i) => (
               <Reveal key={item.title} delay={0.05 + i * 0.07}>
-                <article className="card-dark group h-full text-center">
-                  <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-gold/15 text-gold transition-colors group-hover:bg-gold group-hover:text-white">
+                <article className="card-dark group h-full">
+                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gold/15 text-gold-soft transition-colors group-hover:bg-gold group-hover:text-white">
                     <item.icon size={20} />
                   </span>
                   <h4 className="mt-5 font-display text-lg font-semibold text-white">
@@ -146,7 +149,7 @@ export function HowWeWork() {
         </div>
 
         <Reveal delay={0.1}>
-          <div className="mt-14 flex justify-center">
+          <div className="mt-14 flex">
             <a href="#contact" className="btn-primary">
               Start Your Project
               <ArrowRight size={16} strokeWidth={2.5} />

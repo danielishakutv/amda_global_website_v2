@@ -1,47 +1,32 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import {
-  CONTENT_STORAGE_KEY,
-  CONTENT_VERSION,
-  DEFAULT_CONTENT,
-  type SiteContent,
-} from "./site-content";
+import { createContext, useContext, useEffect, useState } from "react";
+import { CONTENT_VERSION, DEFAULT_CONTENT, type SiteContent } from "./site-content";
 
-type StoredShape = { version: number; updatedAt: string; content: SiteContent };
+// Content is published on the server (see lib/content-server.ts) and rendered
+// into every page by the root layout, so this provider just holds that value —
+// plus live updates when the admin publishes from the same tab.
 
-function readStored(): SiteContent | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(CONTENT_STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as StoredShape;
-    if (parsed.version !== CONTENT_VERSION || !parsed.content) return null;
-    // Shallow-merge over defaults so new fields added later still resolve.
-    return { ...DEFAULT_CONTENT, ...parsed.content };
-  } catch {
-    return null;
-  }
-}
+const UPDATED_EVENT = "amda:content-updated";
 
 const ContentCtx = createContext<SiteContent>(DEFAULT_CONTENT);
 
-export function ContentProvider({ children }: { children: React.ReactNode }) {
-  const [content, setContent] = useState<SiteContent>(DEFAULT_CONTENT);
+export function ContentProvider({
+  initial,
+  children,
+}: {
+  initial: SiteContent;
+  children: React.ReactNode;
+}) {
+  const [content, setContent] = useState<SiteContent>(initial);
 
   useEffect(() => {
-    const stored = readStored();
-    if (stored) setContent(stored);
-    const onUpdate = () => {
-      const next = readStored();
-      setContent(next ?? DEFAULT_CONTENT);
+    const onUpdate = (e: Event) => {
+      const next = (e as CustomEvent<SiteContent>).detail;
+      if (next) setContent(next);
     };
-    window.addEventListener("amda:content-updated", onUpdate);
-    window.addEventListener("storage", onUpdate);
-    return () => {
-      window.removeEventListener("amda:content-updated", onUpdate);
-      window.removeEventListener("storage", onUpdate);
-    };
+    window.addEventListener(UPDATED_EVENT, onUpdate);
+    return () => window.removeEventListener(UPDATED_EVENT, onUpdate);
   }, []);
 
   return <ContentCtx.Provider value={content}>{children}</ContentCtx.Provider>;
@@ -51,50 +36,62 @@ export function useSiteContent(): SiteContent {
   return useContext(ContentCtx);
 }
 
-export function saveSiteContent(next: SiteContent) {
-  const payload: StoredShape = {
-    version: CONTENT_VERSION,
-    updatedAt: new Date().toISOString(),
-    content: next,
-  };
-  window.localStorage.setItem(CONTENT_STORAGE_KEY, JSON.stringify(payload));
-  window.dispatchEvent(new Event("amda:content-updated"));
-}
+type Result = { ok: boolean; reason?: string; updatedAt?: string };
 
-export function resetSiteContent() {
-  window.localStorage.removeItem(CONTENT_STORAGE_KEY);
-  window.dispatchEvent(new Event("amda:content-updated"));
-}
-
-export function exportSiteContent(): string {
-  const raw = window.localStorage.getItem(CONTENT_STORAGE_KEY);
-  if (raw) return raw;
-  return JSON.stringify(
-    { version: CONTENT_VERSION, updatedAt: new Date().toISOString(), content: DEFAULT_CONTENT },
-    null,
-    2
-  );
-}
-
-export function useContentSaver() {
-  const content = useSiteContent();
-  return useCallback(
-    (patch: Partial<SiteContent>) => saveSiteContent({ ...content, ...patch }),
-    [content]
-  );
-}
-
-export function contentLastUpdated(): string | null {
+async function readJson(res: Response): Promise<Record<string, unknown>> {
   try {
-    const raw = window.localStorage.getItem(CONTENT_STORAGE_KEY);
-    if (!raw) return null;
-    return (JSON.parse(raw) as StoredShape).updatedAt ?? null;
+    return (await res.json()) as Record<string, unknown>;
+  } catch {
+    return {};
+  }
+}
+
+/** Latest published content, fresh from the server (admin only). */
+export async function fetchSiteContent(): Promise<{ content: SiteContent; updatedAt: string | null } | null> {
+  try {
+    const res = await fetch("/api/admin/content/", { cache: "no-store" });
+    if (!res.ok) return null;
+    const body = await readJson(res);
+    if (!body.content) return null;
+    return { content: body.content as SiteContent, updatedAt: (body.updatedAt as string | null) ?? null };
   } catch {
     return null;
   }
 }
 
-export function useLiveContent(): SiteContent {
-  const ctx = useSiteContent();
-  return useMemo(() => ctx, [ctx]);
+/** Publish to the live site. */
+export async function saveSiteContent(next: SiteContent): Promise<Result> {
+  try {
+    const res = await fetch("/api/admin/content/", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: next }),
+    });
+    const body = await readJson(res);
+    if (!res.ok) return { ok: false, reason: typeof body.reason === "string" ? body.reason : "error" };
+    window.dispatchEvent(new CustomEvent(UPDATED_EVENT, { detail: body.content ?? next }));
+    return { ok: true, updatedAt: body.updatedAt as string };
+  } catch {
+    return { ok: false, reason: "network" };
+  }
+}
+
+/** Remove published edits — the site falls back to the built-in defaults. */
+export async function resetSiteContent(): Promise<Result> {
+  try {
+    const res = await fetch("/api/admin/content/", { method: "DELETE" });
+    if (!res.ok) return { ok: false, reason: "error" };
+    window.dispatchEvent(new CustomEvent(UPDATED_EVENT, { detail: DEFAULT_CONTENT }));
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: "network" };
+  }
+}
+
+export function exportSiteContent(content: SiteContent): string {
+  return JSON.stringify(
+    { version: CONTENT_VERSION, updatedAt: new Date().toISOString(), content },
+    null,
+    2
+  );
 }

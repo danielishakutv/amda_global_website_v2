@@ -1,10 +1,12 @@
-/* AMDA site content — single source of truth, mirrors guide.md.
+/* AMDA site content — defaults, mirrors guide.md.
    Homepage + About + Admin all read from here.
-   Admin overrides are stored in localStorage (key below) and merged over these defaults,
-   so a rebuild without the override always falls back to this file. */
+   Admin edits are published to the server (DATA_DIR/site-content.json) and merged
+   over these defaults, so a missing or partial file always falls back to this one. */
 
 export const CONTENT_VERSION = 2;
-export const CONTENT_STORAGE_KEY = "amda-content-v1";
+// Old per-browser draft key. Only read once by the admin to offer recovering
+// edits made before content moved to the server.
+export const LEGACY_CONTENT_STORAGE_KEY = "amda-content-v1";
 
 export type VisualPackage = {
   id: string;
@@ -26,6 +28,9 @@ export type TestimonialItem = {
   media?: string; // /public path or remote URL; empty = placeholder
   date?: string;
 };
+
+/** Answer paragraphs are separated by a blank line. */
+export type FaqItem = { q: string; a: string };
 
 export type TeamMember = {
   id: string;
@@ -62,6 +67,7 @@ export type SiteContent = {
   vision: string;
   mission: string;
   coreValues: string[];
+  whoWeServe: string[];
   packages: VisualPackage[];
   cac: {
     title: string;
@@ -86,6 +92,7 @@ export type SiteContent = {
     items: string[];
   };
   whyChoose: { title: string; body: string }[];
+  faqs: FaqItem[];
   operatingModel: { title: string; body: string }[];
   responseTime: string;
   address: string;
@@ -93,6 +100,7 @@ export type SiteContent = {
   phoneHref: string;
   email: string;
   coverage: string;
+  socials: { linkedin: string; instagram: string; facebook: string; tiktok: string };
   founder: {
     name: string;
     title: string;
@@ -131,10 +139,10 @@ export const DEFAULT_CONTENT: SiteContent = {
     heading: "Our Story",
     headline: "We learned it the hard way, so other businesses don't have to.",
     body: [
-      "AMDA Global Solutions was born from our experience of discovering the gap between branding, compliance, brand protection, and printing — services that are often treated separately, even though they are closely connected in the life of a business.",
+      "AMDA Global Solutions was born from our experience of discovering the gap between branding, compliance, brand protection, and printing: services that are often treated separately, even though they are closely connected in the life of a business.",
       "Our journey began in the printing industry, where our founder worked as a graphics designer while learning the business of printing. As we worked with more businesses on logos and visual identities, we began to understand that building a brand goes far beyond creating something that looks good.",
       "We saw businesses invest in branding without first considering whether their names could be properly registered or protected. Some assumed that registering with the Corporate Affairs Commission was enough, only to discover later that there were other important steps involved in properly building and protecting their brands.",
-      "Then, we experienced the problem ourselves. After establishing a design agency, our registered business name was revoked by the Corporate Affairs Commission shortly after we had invested in branding and launched the business. That experience pushed us to learn more about the relationship between branding, compliance, and brand protection — and showed us how costly avoidable mistakes can be.",
+      "Then, we experienced the problem ourselves. After establishing a design agency, our registered business name was revoked by the Corporate Affairs Commission shortly after we had invested in branding and launched the business. That experience pushed us to learn more about the relationship between branding, compliance, and brand protection, and showed us how costly avoidable mistakes can be.",
       "That experience became the foundation of AMDA. Today, we bring branding, printing and publishing, compliance support, and brand protection together, giving businesses access to connected solutions under one roof.",
       "Our goal is simple: to help businesses build intentionally, avoid preventable mistakes, protect what they build, and present themselves professionally as they grow.",
     ],
@@ -142,6 +150,14 @@ export const DEFAULT_CONTENT: SiteContent = {
   vision: "To become the number one trusted African brand partner.",
   mission: "To help businesses build intentional, sustainable, and protected brands.",
   coreValues: ["Integrity", "Excellence", "Impact"],
+  whoWeServe: [
+    "Startups and SMEs",
+    "Established businesses",
+    "Personal brands and professionals",
+    "NGOs and organisations",
+    "Authors and publishers",
+    "Creators and public-facing professionals",
+  ],
   packages: [
     {
       id: "starter",
@@ -177,7 +193,7 @@ export const DEFAULT_CONTENT: SiteContent = {
     },
   ],
   cac: {
-    title: "Business Name Registration — CAC",
+    title: "Business Name Registration (CAC)",
     summary:
       "Register your business correctly with the Corporate Affairs Commission and start operating with confidence.",
     rows: [
@@ -203,14 +219,14 @@ export const DEFAULT_CONTENT: SiteContent = {
   complianceAudit: {
     title: "Brand Compliance Check & Audit",
     summary:
-      "Full compliance audit of your brand — naming, registration, protection gaps, and next steps.",
+      "Full compliance audit of your brand: naming, registration, protection gaps, and next steps.",
     price: "₦20,000",
     formUrl: "",
   },
   printPublish: {
     title: "Print & Publish",
     summary:
-      "Commercial printing, books, magazines and corporate materials — plus publishing support from manuscript to finished copy.",
+      "Commercial printing, books, magazines and corporate materials, plus publishing support from manuscript to finished copy.",
     items: [
       "Commercial Printing",
       "Books",
@@ -220,13 +236,55 @@ export const DEFAULT_CONTENT: SiteContent = {
     ],
   },
   whyChoose: [
-    { title: "End-to-End Support", body: "One accountable team from idea to launch — strategy, identity, compliance and print." },
+    { title: "End-to-End Support", body: "One accountable team from idea to launch: strategy, identity, compliance and print." },
     { title: "From Business Idea to Industry Leadership", body: "We meet you where you are and build with you as you grow." },
     { title: "One Trusted Partner", body: "No juggling vendors. Branding, compliance, publishing and business support under one roof." },
     { title: "Branding, Compliance, Publishing & Business Support Under One Roof", body: "Connected solutions instead of disconnected suppliers." },
     { title: "Professional Execution", body: "Systems, timelines and documentation you can rely on." },
-    { title: "Long-Term Relationship Approach", body: "We build for durability — and stay with you after launch." },
+    { title: "Long-Term Relationship Approach", body: "We build for durability and stay with you after launch." },
     { title: "Affordable & Scalable Solutions", body: "Clear packages that start small and scale with your ambition." },
+  ],
+  faqs: [
+    {
+      q: "What services does AMDA provide?",
+      a: "AMDA Global Solutions provides services across five key areas: Branding, Protection, Compliance, Printing, and Publishing.",
+    },
+    {
+      q: "Which package is right for my business?",
+      a: "Our packages are designed to meet different business needs and stages. If you are unsure which package is right for you, we recommend starting with a consultation. We will understand your needs and recommend the most suitable service or package.",
+    },
+    {
+      q: "What is included in the displayed price?",
+      a: "The displayed price includes AMDA's service charge and applicable government or statutory fees. Where pricing varies based on specific requirements, such as the type or share capital of a company registration, the applicable price will be confirmed before proceeding.",
+    },
+    {
+      q: "How long does the process take?",
+      a: "Our response time is typically 1–12 hours. The actual completion time depends on the specific service and, where applicable, the processing time of the relevant government or regulatory body.",
+    },
+    {
+      q: "What documents or information do I need to provide?",
+      a: "Requirements vary depending on the service you need. Simply select the service you are interested in and complete the relevant enquiry form. The form will provide the information and documents required for that service.",
+    },
+    {
+      q: "What happens if my business name is rejected or a trademark search finds a conflict?",
+      a: "We recommend starting with a consultation so we can assess your proposed name before proceeding. Where a business name is rejected, we can provide alternative names and guide you through the next step. If a trademark search identifies an existing or conflicting mark, we will inform you and recommend suitable alternatives. Trademark/name search fees are non-refundable.",
+    },
+    {
+      q: "Who owns the final brand assets?",
+      a: "Upon full payment, the client owns the final approved brand designs and assets covered by the project. However, AMDA retains the right to showcase completed projects in its portfolio, website, social media, and other promotional materials, unless otherwise agreed with the client.",
+    },
+    {
+      q: "Is AMDA a law firm?",
+      a: "No. AMDA Global Solutions is not a law firm. We provide business and compliance advisory services and work with certified legal professionals where legal services are required.",
+    },
+    {
+      q: "Can I visit the AMDA office?",
+      a: "Yes. Customers are welcome to visit our physical office without an appointment.\n\nOffice Address:\nNo. 5 H Plaza, Beside NNPC Filling Station, New Nyanya, Karu, Nasarawa State, Nigeria.",
+    },
+    {
+      q: "How does the enquiry process work?",
+      a: "Simply select the service you need and complete the relevant enquiry form. We will review your enquiry, understand your needs, recommend the appropriate service or package, and guide you through the next steps.",
+    },
   ],
   operatingModel: [
     {
@@ -242,12 +300,18 @@ export const DEFAULT_CONTENT: SiteContent = {
       body: "We prioritize professional systems and accountability, ensuring transparent communication throughout.",
     },
   ],
-  responseTime: "12–48 hours maximum",
+  responseTime: "1–12 hours",
   address: "No. 5 H Plaza, Beside NNPC Filling Station, New Nyanya, Karu, Nasarawa State, Nigeria.",
   phone: "+234 707 779 8418",
   phoneHref: "tel:+2347077798418",
   email: "info@amdaglobal.com",
   coverage: "Nigeria & International (Africa)",
+  socials: {
+    linkedin: "https://www.linkedin.com/company/amdaglobal/",
+    instagram: "https://www.instagram.com/amdaglobal/",
+    facebook: "https://www.facebook.com/share/1Hyg3JTeDU/",
+    tiktok: "https://www.tiktok.com/@amdaglobal",
+  },
   founder: {
     name: "Jesse Hosea",
     title: "Founder & Creative Director, AMDA Global Solutions Ltd",
@@ -262,22 +326,22 @@ export const DEFAULT_CONTENT: SiteContent = {
       client: "Client Name",
       project: "Brand Identity",
       kind: "written",
-      quote: "Testimonial placeholder — AMDA will supply written testimonials, screenshots, photos, video and voice-note testimonials. This card shows the written format.",
+      quote: "Testimonial placeholder: AMDA will supply written testimonials, screenshots, photos, video and voice-note testimonials. This card shows the written format.",
     },
     {
       id: "t-screenshot-1",
       client: "Client Name",
       project: "Compliance Support",
       kind: "screenshot",
-      quote: "Screenshot testimonial placeholder — swap the media field with a real testimonial screenshot.",
+      quote: "Screenshot testimonial placeholder: swap the media field with a real testimonial screenshot.",
       media: "/testimonial-outreach.webp",
     },
     {
       id: "t-delivery-1",
       client: "Chima Ariel Onoka",
-      project: "Book Publishing — MULTIPLY",
+      project: "Book Publishing: MULTIPLY",
       kind: "delivery",
-      quote: "Book design and bulk print delivery — MULTIPLY.",
+      quote: "Book design and bulk print delivery for MULTIPLY.",
       media: "/newprojects/print-multiply-book.webp",
     },
     {
@@ -285,15 +349,15 @@ export const DEFAULT_CONTENT: SiteContent = {
       client: "Toko Academy",
       project: "KSCC 2026 Booklet",
       kind: "delivery",
-      quote: "Kids Summer Coding Camp 2026 booklet — design and print run.",
+      quote: "Kids Summer Coding Camp 2026 booklet: design and print run.",
       media: "/newprojects/print-toko-academy.webp",
     },
     {
       id: "t-delivery-3",
       client: "Victor Ajiboye",
-      project: "Book Publishing — Edge of Exposure",
+      project: "Book Publishing: Edge of Exposure",
       kind: "delivery",
-      quote: "Cover design and print delivery — Edge of Exposure.",
+      quote: "Cover design and print delivery for Edge of Exposure.",
       media: "/newprojects/print-edge-exposure.webp",
     },
     {
@@ -301,7 +365,7 @@ export const DEFAULT_CONTENT: SiteContent = {
       client: "NAF Protestant Sunday School",
       project: "Custom Apparel",
       kind: "photo",
-      quote: "Custom branded tees — NAF Protestant Sunday School Teachers.",
+      quote: "Custom branded tees for NAF Protestant Sunday School Teachers.",
       media: "/newprojects/brand-naf-sunday-shirts.webp",
     },
     {
@@ -309,7 +373,7 @@ export const DEFAULT_CONTENT: SiteContent = {
       client: "Client Name",
       project: "Brand Strategy",
       kind: "video",
-      quote: "Video testimonial — tap play to stream. File is served locally with click-to-play so the page stays fast.",
+      quote: "Video testimonial: tap play to watch.",
       media: "/testimonials/amda-testimonial-1.mp4",
     },
     {
@@ -317,7 +381,7 @@ export const DEFAULT_CONTENT: SiteContent = {
       client: "Client Name",
       project: "Publishing Support",
       kind: "audio",
-      quote: "Voice-note testimonial placeholder — upload the client voice note and set its media path here.",
+      quote: "Voice-note testimonial placeholder: upload the client voice note in admin.",
       media: "",
     },
   ],

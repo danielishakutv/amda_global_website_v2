@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowRight, Globe2, Wifi, Eye, Target, Gem } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, ChevronDown, Globe2, Wifi, Eye, Target, Gem } from "lucide-react";
 import { Reveal } from "./ui/Reveal";
 import { SectionTag } from "./ui/SectionTag";
 import { useSiteContent } from "@/lib/content-store";
@@ -8,6 +9,9 @@ import { useSiteContent } from "@/lib/content-store";
 export function About() {
   const content = useSiteContent();
   const { whoWeAre, vision, mission, coreValues, coverage } = content;
+  const [expanded, setExpanded] = useState(false);
+  // First paragraph always shows; the rest sits behind "Read more".
+  const [lead, ...rest] = whoWeAre.body;
 
   return (
     <section id="about" aria-labelledby="about-heading" className="section bg-cream">
@@ -35,10 +39,41 @@ export function About() {
             </Reveal>
 
             <Reveal delay={0.15}>
-              <div className="mt-8 space-y-5 text-base leading-relaxed text-muted">
-                {whoWeAre.body.map((p, i) => (
-                  <p key={i}>{p}</p>
-                ))}
+              <div className="mt-8 text-base leading-relaxed text-muted">
+                <p>{lead}</p>
+                {rest.length > 0 && (
+                  <>
+                    {/* Height animates via grid rows (0fr -> 1fr); text stays in the HTML for SEO */}
+                    <div
+                      id="about-more"
+                      className={`grid transition-[grid-template-rows] duration-300 ease-out ${
+                        expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                      }`}
+                    >
+                      <div className="overflow-hidden" aria-hidden={!expanded}>
+                        <div className="space-y-5 pt-5">
+                          {rest.map((p, i) => (
+                            <p key={i}>{p}</p>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setExpanded((v) => !v)}
+                      aria-expanded={expanded}
+                      aria-controls="about-more"
+                      className="mt-4 inline-flex items-center gap-1.5 border-b border-gold-deep/40 pb-0.5 text-sm font-semibold text-gold-deep transition-colors hover:border-gold-deep"
+                    >
+                      {expanded ? "Read less" : "Read more"}
+                      <ChevronDown
+                        size={15}
+                        strokeWidth={2.5}
+                        className={`transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}
+                      />
+                    </button>
+                  </>
+                )}
               </div>
             </Reveal>
 
@@ -65,7 +100,7 @@ export function About() {
             <Reveal delay={0.1}>
               <article className="card-light overflow-hidden border-navy/10 bg-white">
                 <div className="flex items-center gap-3">
-                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-navy text-gold">
+                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-navy text-gold-soft">
                     <Eye size={18} />
                   </span>
                   <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
@@ -82,7 +117,7 @@ export function About() {
                   <span className="grid h-10 w-10 place-items-center rounded-xl bg-gold text-white">
                     <Target size={18} />
                   </span>
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-gold-soft">
                     Our Mission
                   </span>
                 </div>
@@ -120,7 +155,7 @@ export function About() {
                   Serving Businesses Across Nigeria &amp; International Markets
                 </h3>
                 <p className="mt-4 max-w-2xl text-muted">
-                  Online &amp; in-person support with a partner-based service model —
+                  Online &amp; in-person support with a partner-based service model,
                   prioritizing systems, professionalism, and accountability for efficient
                   service delivery.
                 </p>

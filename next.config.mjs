@@ -6,19 +6,24 @@
 // Tailwind and framer-motion emit inline styles; everything else is locked down.
 // The high-value wins here are frame-ancestors (clickjacking on /admin),
 // object-src 'none', and base-uri/form-action 'self'.
+// `next dev` needs eval (React Refresh / source maps) and a websocket for HMR.
+// Without these the dev page never hydrates. Production keeps the strict policy.
+const isDev = process.env.NODE_ENV !== "production";
+
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://www.googletagmanager.com https://www.google-analytics.com`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://www.googletagmanager.com https://www.google-analytics.com",
   "font-src 'self' data:",
   "media-src 'self'",
-  "connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com",
+  `connect-src 'self'${isDev ? " ws: wss:" : ""} https://www.googletagmanager.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com`,
   "frame-ancestors 'self'",
   "base-uri 'self'",
   "form-action 'self'",
   "object-src 'none'",
-  "upgrade-insecure-requests",
+  // Only meaningful behind HTTPS; on http://localhost it would break dev assets.
+  ...(isDev ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
 
 const securityHeaders = [
