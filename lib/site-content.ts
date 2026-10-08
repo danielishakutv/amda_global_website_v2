@@ -15,6 +15,7 @@ export type VisualPackage = {
   description: string;
   features: string[];
   cta: string;
+  formUrl: string; // Google Form link for "Get Started"; empty = contact section
 };
 
 export type ComplianceRow = { label: string; value: string };
@@ -23,7 +24,7 @@ export type TestimonialItem = {
   id: string;
   client: string;
   project: string;
-  kind: "written" | "screenshot" | "photo" | "video" | "audio" | "delivery";
+  kind: "written" | "screenshot" | "photo" | "video" | "audio" | "delivery" | "training" | "outreach";
   quote?: string;
   media?: string; // /public path or remote URL; empty = placeholder
   date?: string;
@@ -166,6 +167,7 @@ export const DEFAULT_CONTENT: SiteContent = {
       description: "Perfect for businesses starting their brand journey.",
       features: ["Brand Audit", "Consultation", "Recommendations"],
       cta: "Get Started",
+      formUrl: "",
     },
     {
       id: "growth",
@@ -178,6 +180,7 @@ export const DEFAULT_CONTENT: SiteContent = {
         "30-Day Content Plan",
       ],
       cta: "Get Started",
+      formUrl: "",
     },
     {
       id: "authority",
@@ -190,6 +193,7 @@ export const DEFAULT_CONTENT: SiteContent = {
         "6 Weeks of Content Support",
       ],
       cta: "Get Started",
+      formUrl: "",
     },
   ],
   cac: {

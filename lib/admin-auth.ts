@@ -91,6 +91,37 @@ export async function apiAuditLog(): Promise<ServerAuditEvent[]> {
   }
 }
 
+export type RatingSummary = {
+  count: number;
+  average: number;
+  dist: Record<"1" | "2" | "3" | "4" | "5", number>;
+};
+
+export async function apiRatings(): Promise<RatingSummary | null> {
+  try {
+    const res = await fetch("/api/admin/ratings/", { cache: "no-store" });
+    if (!res.ok) return null;
+    const body = await readJson(res);
+    if (body.ok !== true) return null;
+    return {
+      count: Number(body.count) || 0,
+      average: Number(body.average) || 0,
+      dist: (body.dist as RatingSummary["dist"]) ?? { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 },
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function apiResetRatings(): Promise<boolean> {
+  try {
+    const res = await fetch("/api/admin/ratings/", { method: "DELETE" });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 export async function apiUpload(
   file: File
 ): Promise<{ ok: boolean; url?: string; reason?: string }> {

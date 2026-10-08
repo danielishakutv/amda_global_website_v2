@@ -21,6 +21,7 @@ const Testimonials = dynamic(
 );
 const Founder = dynamic(() => import("@/components/Founder").then((m) => m.Founder));
 const Faq = dynamic(() => import("@/components/Faq").then((m) => m.Faq));
+const Rating = dynamic(() => import("@/components/Rating").then((m) => m.Rating));
 const Contact = dynamic(
   () => import("@/components/Contact").then((m) => m.Contact)
 );
@@ -41,6 +42,7 @@ export default function Home() {
         <WhyChoose />
         <HowWeWork />
         <Testimonials />
+        <Rating />
         <About />
         <Founder />
         <Faq />

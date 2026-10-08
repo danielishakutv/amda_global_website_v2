@@ -1,17 +1,24 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { UploadCloud, Loader2, Trash2, ImageOff } from "lucide-react";
+import { UploadCloud, Loader2, Trash2, ImageOff, Music, Film } from "lucide-react";
 import { apiUpload } from "@/lib/admin-auth";
+import { mediaKind } from "@/lib/media";
 
-function uploadError(reason?: string): string {
+function uploadError(reason: string | undefined, accept: "image" | "media"): string {
   switch (reason) {
     case "too-large":
-      return "That image is over 12MB — pick a smaller one.";
+      return accept === "image"
+        ? "That image is over 12MB — pick a smaller one."
+        : "That file is too large (images 12MB, audio 25MB, video 64MB). For a long video, paste a YouTube link instead.";
     case "bad-type":
-      return "Use a PNG, JPG, WebP, GIF or AVIF image.";
+      return accept === "image"
+        ? "Use a PNG, JPG, WebP, GIF or AVIF image."
+        : "Use an image (PNG/JPG/WebP), audio (MP3/M4A/WAV) or video (MP4/WebM).";
     case "bad-image":
       return "That file isn't a readable image.";
+    case "empty-file":
+      return "That file is empty. Please choose the original media file and try again.";
     case "unauthorized":
       return "Session expired — please log in again.";
     default:
@@ -19,34 +26,49 @@ function uploadError(reason?: string): string {
   }
 }
 
+const ACCEPT_ATTR = {
+  image: "image/png,image/jpeg,image/webp,image/gif,image/avif",
+  media:
+    "image/png,image/jpeg,image/webp,image/gif,image/avif,audio/*,video/mp4,video/webm,video/quicktime,.mp3,.m4a,.aac,.ogg,.opus,.wav,.weba,.flac,.mp4,.webm,.mov",
+} as const;
+
+const IMAGE_FILE_RE = /\.(png|jpe?g|webp|gif|avif)$/i;
+
 /**
- * Image/media field: live preview + drag-and-drop upload + manual path entry.
- * Upload is image-only (the server re-encodes to WebP); for video/audio the
- * upload button is hidden and the path is entered by hand, but the preview
- * still plays the file so the admin can confirm it.
+ * Media field: live preview + drag-and-drop upload + manual path entry.
+ * accept="image" takes images only; accept="media" also takes audio and video.
+ * The preview adapts to whatever the current value points at (photo, clip or
+ * voice note), so Training/Outreach items can hold any of them.
  */
 export function ImageField({
   label,
   hint,
   value,
   onChange,
-  media = "image",
+  accept = "image",
 }: {
   label: string;
   hint?: string;
   value: string;
   onChange: (next: string) => void;
-  media?: "image" | "video" | "audio";
+  accept?: "image" | "media";
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [broken, setBroken] = useState(false);
   const [dragOver, setDragOver] = useState(false);
-  const canUpload = media === "image";
+  const canUpload = true;
+  const kind = mediaKind(value);
 
   const doUpload = async (file: File) => {
     setErr(null);
+    // The file picker applies `accept`, but drag-and-drop does not. Keep image
+    // fields image-only while still allowing blank-MIME images from Windows.
+    if (accept === "image" && !file.type.startsWith("image/") && !IMAGE_FILE_RE.test(file.name)) {
+      setErr(uploadError("bad-type", accept));
+      return;
+    }
     setBusy(true);
     const res = await apiUpload(file);
     setBusy(false);
@@ -54,7 +76,7 @@ export function ImageField({
       setBroken(false);
       onChange(res.url);
     } else {
-      setErr(uploadError(res.reason));
+      setErr(uploadError(res.reason, accept));
     }
   };
 
@@ -100,7 +122,7 @@ export function ImageField({
           }`}
         >
           {hasValue && !broken ? (
-            media === "image" ? (
+            kind === "image" ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={value}
@@ -108,26 +130,25 @@ export function ImageField({
                 onError={() => setBroken(true)}
                 className="h-full w-full object-cover"
               />
-            ) : media === "video" ? (
-              <video src={value} className="h-full w-full object-cover" muted />
+            ) : kind === "video" ? (
+              <div className="flex flex-col items-center gap-1 text-navy/70">
+                <Film size={20} />
+                <span className="text-[0.6rem] font-medium">Video set</span>
+              </div>
             ) : (
-              <div className="px-2 text-center text-[0.6rem] font-medium text-navy/70">
-                Audio file set
+              <div className="flex flex-col items-center gap-1 text-navy/70">
+                <Music size={20} />
+                <span className="text-[0.6rem] font-medium">Audio set</span>
               </div>
             )
           ) : (
             <div className="flex flex-col items-center gap-1 px-2 text-center">
               {busy ? (
                 <Loader2 size={20} className="animate-spin text-gold-deep" />
-              ) : broken ? (
-                <>
-                  <ImageOff size={18} />
-                  <span className="text-[0.6rem] leading-tight">Not found</span>
-                </>
               ) : (
                 <>
                   <ImageOff size={18} />
-                  <span className="text-[0.6rem] leading-tight">No image</span>
+                  <span className="text-[0.6rem] leading-tight">{broken ? "Not found" : "Nothing yet"}</span>
                 </>
               )}
             </div>
@@ -144,13 +165,7 @@ export function ImageField({
           <input
             className="input-field"
             value={value}
-            placeholder={
-              media === "image"
-                ? "/uploads/… or paste a path"
-                : media === "video"
-                  ? "/testimonials/clip.mp4 or https://…"
-                  : "/testimonials/voice.mp3 or https://…"
-            }
+            placeholder={accept === "image" ? "/api/uploads/… or paste a path" : "Upload a file, or paste a path / YouTube link"}
             onChange={(e) => {
               setBroken(false);
               onChange(e.target.value);
@@ -165,7 +180,7 @@ export function ImageField({
                 className="inline-flex items-center gap-1.5 rounded-full bg-navy px-4 py-2 text-xs font-semibold text-cream transition-colors hover:bg-navy-soft disabled:opacity-60"
               >
                 {busy ? <Loader2 size={13} className="animate-spin" /> : <UploadCloud size={13} />}
-                {busy ? "Uploading…" : hasValue ? "Replace image" : "Upload image"}
+                {busy ? "Uploading…" : hasValue ? (accept === "image" ? "Replace image" : "Replace file") : (accept === "image" ? "Upload image" : "Upload file")}
               </button>
             )}
             {hasValue && (
@@ -187,20 +202,18 @@ export function ImageField({
         </div>
       </div>
 
-      {canUpload && (
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
-          className="hidden"
-          aria-label={`Upload ${label}`}
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) void doUpload(f);
-            e.target.value = "";
-          }}
-        />
-      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept={ACCEPT_ATTR[accept]}
+        className="hidden"
+        aria-label={`Upload ${label}`}
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) void doUpload(f);
+          e.target.value = "";
+        }}
+      />
       {hint && <span className="mt-2 block text-xs text-muted">{hint}</span>}
     </div>
   );

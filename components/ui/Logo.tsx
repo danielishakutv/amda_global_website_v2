@@ -14,8 +14,8 @@ type Props = {
   priority?: boolean;
 };
 
-// amda-logo-wide.webp is cropped from the 8334px master PNG (520x125).
-const WORDMARK_RATIO = 520 / 125;
+// amda-logo-wide.webp is cropped from the 8334px master PNG (1000x240).
+const WORDMARK_RATIO = 1000 / 240;
 
 export function Logo({ variant = "onLight", height = 36, className = "", priority = false }: Props) {
   const wordmark = variant === "wordmark";
@@ -28,6 +28,7 @@ export function Logo({ variant = "onLight", height = 36, className = "", priorit
       alt="AMDA Global Solution"
       width={width}
       height={height}
+      quality={90}
       style={{ height, width: "auto" }}
       className="block select-none"
       draggable={false}

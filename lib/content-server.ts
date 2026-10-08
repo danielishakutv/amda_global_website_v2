@@ -69,7 +69,8 @@ export function sanitizeContent(input: unknown): SiteContent | null {
     phoneHref: safeUrl(c.phoneHref) || DEFAULT_CONTENT.phoneHref,
     hero: { ...c.hero, backgroundImage: safeUrl(c.hero.backgroundImage) },
     founder: { ...c.founder, photo: safeUrl(c.founder?.photo), linkedin: safeUrl(c.founder?.linkedin) },
-    complianceAudit: { ...c.complianceAudit, formUrl: safeUrl(c.complianceAudit?.formUrl) },
+    complianceAudit: { ...c.complianceAudit, formUrl: externalUrl(c.complianceAudit?.formUrl) },
+    packages: c.packages.map((p) => ({ ...p, formUrl: externalUrl(p.formUrl) })),
     socials: {
       linkedin: externalUrl(c.socials?.linkedin),
       instagram: externalUrl(c.socials?.instagram),

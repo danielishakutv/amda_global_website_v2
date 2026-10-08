@@ -170,7 +170,7 @@ function BrandingPanel() {
 
       <div className="mt-12 grid gap-6 lg:grid-cols-3">
         {content.packages.map((pkg, i) => (
-          <PackageCard key={pkg.id} name={pkg.name} price={pkg.price} description={pkg.description} features={pkg.features} featured={i === 1} />
+          <PackageCard key={pkg.id} name={pkg.name} price={pkg.price} description={pkg.description} features={pkg.features} featured={i === 1} formUrl={pkg.formUrl} />
         ))}
       </div>
     </div>
@@ -183,13 +183,19 @@ function PackageCard({
   description,
   features,
   featured,
+  formUrl,
 }: {
   name: string;
   price: string;
   description: string;
   features: string[];
   featured: boolean;
+  formUrl?: string;
 }) {
+  // With a Google Form link the button opens it in a new tab; otherwise it
+  // sends the visitor to the contact section.
+  const href = formUrl?.trim() ? formUrl.trim() : "#contact";
+  const external = href.startsWith("http");
   return (
     <article
       className={`relative flex flex-col overflow-hidden rounded-3xl p-8 transition-all duration-300 ${
@@ -228,7 +234,8 @@ function PackageCard({
       </ul>
 
       <a
-        href="#contact"
+        href={href}
+        {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
         className={`mt-8 inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-300 ${
           featured
             ? "bg-gold text-white hover:bg-gold-soft"

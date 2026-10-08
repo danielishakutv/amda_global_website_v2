@@ -123,19 +123,19 @@ export function Footer() {
             <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-gold-soft">Contact</h3>
             <ul className="mt-5 space-y-4 text-sm">
               <li className="flex items-start gap-3 text-white/70">
-                <Phone size={16} className="mt-1 text-gold-soft" />
+                <Phone size={18} strokeWidth={2} className="mt-0.5 shrink-0 text-gold-soft" />
                 <a href={site.phoneHref} className="transition-colors hover:text-gold-soft">
                   {site.phone}
                 </a>
               </li>
               <li className="flex items-start gap-3 text-white/70">
-                <Mail size={16} className="mt-1 text-gold-soft" />
+                <Mail size={18} strokeWidth={2} className="mt-0.5 shrink-0 text-gold-soft" />
                 <a href={`mailto:${site.email}`} className="transition-colors hover:text-gold-soft">
                   {site.email}
                 </a>
               </li>
               <li className="flex items-start gap-3 text-white/70">
-                <MapPin size={16} className="mt-1 text-gold-soft" />
+                <MapPin size={18} strokeWidth={2} className="mt-0.5 shrink-0 text-gold-soft" />
                 <span>{site.address}</span>
               </li>
             </ul>

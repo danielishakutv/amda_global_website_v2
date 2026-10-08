@@ -27,6 +27,7 @@ import {
   X,
   ScrollText,
   CircleHelp,
+  Star,
 } from "lucide-react";
 import {
   DEFAULT_CONTENT,
@@ -48,10 +49,13 @@ import {
   apiMarkMessage,
   apiMe,
   apiAuditLog,
+  apiRatings,
+  apiResetRatings,
   audit,
   readAudit,
   type InboxMessage,
   type ServerAuditEvent,
+  type RatingSummary,
 } from "@/lib/admin-auth";
 import { Logo } from "../ui/Logo";
 import { Field, TextInput, TextArea, Card, ImageField } from "./fields";
@@ -813,6 +817,9 @@ function ActivityLog() {
     logout: { label: "Signed out", dot: "bg-navy/40" },
     "password-changed": { label: "Password changed", dot: "bg-amber-500" },
     "image-upload": { label: "Image uploaded", dot: "bg-gold" },
+    "audio-upload": { label: "Audio uploaded", dot: "bg-gold" },
+    "video-upload": { label: "Video uploaded", dot: "bg-gold" },
+    "ratings-reset": { label: "Star ratings reset", dot: "bg-amber" },
     "message-deleted": { label: "Message deleted", dot: "bg-red-500" },
     "content-published": { label: "Website content published", dot: "bg-gold" },
     "content-reset": { label: "Website reset to original texts", dot: "bg-amber" },
@@ -944,6 +951,9 @@ function ServicesEditor({ draft, set }: { draft: SiteContent; set: <K extends ke
             <Field label="Features (comma separated)" hint="e.g. Brand Audit, Consultation, Recommendations">
               <TextInput value={p.features.join(", ")} onChange={(e) => set("packages", draft.packages.map((x, j) => (j === i ? { ...x, features: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) } : x)))} />
             </Field>
+            <Field label={`"Get Started" form link`} hint="Paste this package's Google Form link. Empty = the button sends them to the contact section.">
+              <TextInput value={p.formUrl ?? ""} placeholder="https://docs.google.com/forms/…" onChange={(e) => set("packages", draft.packages.map((x, j) => (j === i ? { ...x, formUrl: e.target.value } : x)))} />
+            </Field>
           </div>
         ))}
       </Card>
@@ -1065,35 +1075,49 @@ function TestimonialsEditor({ draft, set }: { draft: SiteContent; set: <K extend
       <Card title="How many clients" sub="Leave empty until AMDA confirms the real number — the site will say “to be announced”.">
         <Field label="Confirmed figure (empty = placeholder)"><TextInput value={draft.clientCount} placeholder="e.g. 120+" onChange={(e) => set("clientCount", e.target.value)} /></Field>
       </Card>
-      <Card title={`Customer reviews (${draft.testimonials.length})`} sub="One row per review: who, which service, what kind (written, photo, video, voice note), and the file. Empty file = placeholder box on the site.">
-        <div className="flex flex-wrap gap-2">
-          {(["written", "screenshot", "photo", "video", "audio", "delivery"] as TestimonialItem["kind"][]).map((k) => (
-            <button key={k} type="button" onClick={() => add(k)} className="rounded-full border border-navy/20 px-4 py-2 text-xs font-semibold text-navy hover:bg-navy hover:text-cream">
-              + {k}
-            </button>
-          ))}
+      <Card title={`Customer reviews (${draft.testimonials.length})`} sub="Each box below is one review or piece of evidence. Pick a category to add a new one, then upload its photo, video or voice note and press Save.">
+        <div className="rounded-2xl border border-dashed border-navy/25 bg-white/70 p-4">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-navy/70">Add a new item</p>
+          <div className="flex flex-wrap gap-2">
+            {([
+              ["written", "Written"],
+              ["screenshot", "Screenshot"],
+              ["photo", "Photo"],
+              ["video", "Video"],
+              ["audio", "Voice note"],
+              ["delivery", "Delivery"],
+              ["training", "Training"],
+              ["outreach", "Outreach"],
+            ] as [TestimonialItem["kind"], string][]).map(([k, label]) => (
+              <button key={k} type="button" onClick={() => add(k)} className="rounded-full border border-navy/20 px-4 py-2 text-xs font-semibold text-navy hover:bg-navy hover:text-cream">
+                + {label}
+              </button>
+            ))}
+          </div>
         </div>
         {draft.testimonials.map((t, i) => (
           <div key={t.id} className="space-y-3 rounded-2xl border border-navy/10 bg-cream/50 p-4">
             <div className="grid gap-3 sm:grid-cols-4">
               <TextInput aria-label="Client" value={t.client} onChange={(e) => set("testimonials", draft.testimonials.map((x, j) => (j === i ? { ...x, client: e.target.value } : x)))} />
               <TextInput aria-label="Project" value={t.project} onChange={(e) => set("testimonials", draft.testimonials.map((x, j) => (j === i ? { ...x, project: e.target.value } : x)))} />
-              <select aria-label="Kind" value={t.kind} onChange={(e) => set("testimonials", draft.testimonials.map((x, j) => (j === i ? { ...x, kind: e.target.value as TestimonialItem["kind"] } : x)))} className="input-field">
-                <option value="written">written</option>
-                <option value="screenshot">screenshot</option>
-                <option value="photo">photo</option>
-                <option value="video">video</option>
-                <option value="audio">audio</option>
-                <option value="delivery">delivery</option>
+              <select aria-label="Category" value={t.kind} onChange={(e) => set("testimonials", draft.testimonials.map((x, j) => (j === i ? { ...x, kind: e.target.value as TestimonialItem["kind"] } : x)))} className="input-field">
+                <option value="written">Written</option>
+                <option value="screenshot">Screenshot</option>
+                <option value="photo">Photo</option>
+                <option value="video">Video</option>
+                <option value="audio">Voice note</option>
+                <option value="delivery">Delivery</option>
+                <option value="training">Training</option>
+                <option value="outreach">Outreach</option>
               </select>
               <button type="button" onClick={() => set("testimonials", draft.testimonials.filter((_, j) => j !== i))} className="rounded-full border border-red-200 px-4 py-2 text-xs font-semibold text-red-700 hover:bg-red-50">
                 Remove
               </button>
             </div>
             <ImageField
-              label="Media"
-              hint={t.kind === "video" || t.kind === "audio" ? "Paste the file path — large media isn't uploaded here." : "Upload an image or drag one in. Empty = placeholder box."}
-              media={t.kind === "video" ? "video" : t.kind === "audio" ? "audio" : "image"}
+              label="Photo, video or voice note"
+              hint="Upload a file (image, MP3/M4A audio, or MP4 video) or drag it in. For a long video, paste a YouTube link. Leave empty for a written-only review."
+              accept="media"
               value={t.media ?? ""}
               onChange={(v) => set("testimonials", draft.testimonials.map((x, j) => (j === i ? { ...x, media: v } : x)))}
             />
@@ -1143,6 +1167,73 @@ function FounderEditor({ draft, set }: { draft: SiteContent; set: <K extends key
       ))}
     </Card>
     </div>
+  );
+}
+
+function RatingsCard() {
+  const [data, setData] = useState<RatingSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    setLoading(true);
+    setData(await apiRatings());
+    setLoading(false);
+  };
+  useEffect(() => {
+    void load();
+  }, []);
+
+  const reset = async () => {
+    if (!confirm("Reset all star ratings to zero? This cannot be undone.")) return;
+    if (await apiResetRatings()) {
+      audit("ratings-reset", "");
+      void load();
+    }
+  };
+
+  const max = data ? Math.max(1, ...Object.values(data.dist)) : 1;
+
+  return (
+    <Card title="Star ratings" sub="What visitors tapped in the “Rate your experience” section on the homepage.">
+      {loading ? (
+        <p className="text-sm text-muted">Loading…</p>
+      ) : !data || data.count === 0 ? (
+        <p className="text-sm text-muted">No ratings yet.</p>
+      ) : (
+        <div className="space-y-5">
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-2">
+              <Star size={22} className="fill-gold text-gold" />
+              <span className="font-display text-3xl font-semibold text-navy">{data.average.toFixed(1)}</span>
+            </span>
+            <span className="text-sm text-muted">
+              average from {data.count} {data.count === 1 ? "rating" : "ratings"}
+            </span>
+          </div>
+          <div className="space-y-1.5">
+            {([5, 4, 3, 2, 1] as const).map((n) => (
+              <div key={n} className="flex items-center gap-3 text-xs text-muted">
+                <span className="w-8 shrink-0 font-semibold text-navy">{n} ★</span>
+                <span className="h-2 flex-1 overflow-hidden rounded-full bg-navy/10">
+                  <span className="block h-full rounded-full bg-gold" style={{ width: `${(data.dist[String(n) as "1"] / max) * 100}%` }} />
+                </span>
+                <span className="w-8 shrink-0 text-right tabular-nums">{data.dist[String(n) as "1"]}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      <div className="flex gap-2">
+        <button type="button" onClick={() => void load()} className="rounded-full border border-navy/20 px-5 py-2.5 text-sm font-semibold text-navy hover:bg-navy hover:text-cream">
+          Refresh
+        </button>
+        {data && data.count > 0 && (
+          <button type="button" onClick={() => void reset()} className="rounded-full border border-red-200 px-5 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50">
+            Reset ratings
+          </button>
+        )}
+      </div>
+    </Card>
   );
 }
 
@@ -1221,6 +1312,8 @@ function SettingsEditor({
           ))}
         </div>
       </Card>
+
+      <RatingsCard />
 
       <Card title="Change your password" sub="You'll be asked for the current one first.">
         <form onSubmit={changePw} className="grid gap-4 sm:grid-cols-2">

@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Play, Mic, ImageIcon, Truck, MessageSquareText, Maximize2 } from "lucide-react";
+import { Play, Mic, ImageIcon, Truck, MessageSquareText, Maximize2, GraduationCap, Megaphone } from "lucide-react";
 import { Reveal } from "./ui/Reveal";
 import { SectionTag } from "./ui/SectionTag";
 import { Lightbox } from "./ui/Lightbox";
 import { useSiteContent } from "@/lib/content-store";
+import { mediaKind } from "@/lib/media";
 import type { TestimonialItem } from "@/lib/site-content";
 // Videos play directly inline (no preview facade, no modal), fully responsive.
 
@@ -20,6 +21,8 @@ const FILTERS: { id: Filter; label: string }[] = [
   { id: "video", label: "Videos" },
   { id: "audio", label: "Voice notes" },
   { id: "delivery", label: "Delivery" },
+  { id: "training", label: "Training" },
+  { id: "outreach", label: "Outreach" },
 ];
 
 export function Testimonials() {
@@ -51,8 +54,9 @@ export function Testimonials() {
           </Reveal>
           <Reveal delay={0.1}>
             <p className="mt-5 max-w-2xl text-pretty text-base leading-relaxed text-muted sm:text-lg">
-              Screenshots, photos, videos and voice notes: one flexible wall that
-              grows as AMDA collects more client evidence.
+            Written testimonials, screenshots, photos, videos, voice notes,
+            deliveries, training and outreach: one flexible wall that grows
+            as AMDA collects more client evidence.
             </p>
           </Reveal>
         </div>
@@ -118,6 +122,10 @@ function kindLabel(kind: TestimonialItem["kind"]) {
       return "Voice note";
     case "delivery":
       return "Delivery photo";
+    case "training":
+      return "Training";
+    case "outreach":
+      return "Outreach";
   }
 }
 
@@ -135,6 +143,10 @@ function kindIcon(kind: TestimonialItem["kind"]) {
       return <Mic size={14} />;
     case "delivery":
       return <Truck size={14} />;
+    case "training":
+      return <GraduationCap size={14} />;
+    case "outreach":
+      return <Megaphone size={14} />;
   }
 }
 
@@ -226,6 +238,7 @@ function ZoomableImage({ item }: { item: TestimonialItem }) {
 
 function TestimonialCard({ item }: { item: TestimonialItem }) {
   const media = (item.media ?? "").trim();
+  const mediaType = mediaKind(media);
   return (
     <article className="card-light flex h-full w-full min-w-0 flex-col overflow-hidden p-5 sm:p-7">
       <div className="flex min-w-0 items-center gap-2 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-gold-deep">
@@ -235,12 +248,13 @@ function TestimonialCard({ item }: { item: TestimonialItem }) {
         <span className="truncate">{kindLabel(item.kind)}</span>
       </div>
 
-      {/* Media slot: only rendered when there is media to show */}
+      {/* Media slot: rendered by the file's actual type (so Training/Outreach
+          items can be a photo or a video), not by the category. */}
       {media && (
         <div className="mt-4 min-w-0 overflow-hidden rounded-xl border border-navy/10 bg-cream/60 sm:rounded-2xl">
-          {item.kind === "video" ? (
+          {mediaType === "video" ? (
             <VideoBlock item={item} />
-          ) : item.kind === "audio" ? (
+          ) : mediaType === "audio" ? (
             <div className="flex min-w-0 flex-col gap-2 p-4">
               <div className="flex min-w-0 items-center gap-2 text-xs font-semibold text-navy">
                 <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-navy text-gold-soft">
